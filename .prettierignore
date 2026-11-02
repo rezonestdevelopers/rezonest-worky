@@ -1,0 +1,4 @@
+pnpm-lock.yaml
+.next
+prisma/migrations
+storage

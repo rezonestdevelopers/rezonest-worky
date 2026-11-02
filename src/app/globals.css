@@ -1,26 +1,150 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * ─── Brand ───────────────────────────────────────────────────────────────
+ * Change the accent colour HERE (one place). Rezonest red from the logo.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand: #d7202a;
+  --brand-foreground: #ffffff;
+
+  --radius: 0.75rem;
+  --background: oklch(0.985 0.002 260);
+  --foreground: oklch(0.2 0.01 260);
+  --card: oklch(1 0 0 / 0.78);
+  --card-solid: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --primary: var(--brand);
+  --primary-foreground: var(--brand-foreground);
+  --secondary: oklch(0.955 0.004 260);
+  --secondary-foreground: oklch(0.25 0.01 260);
+  --muted: oklch(0.955 0.004 260);
+  --muted-foreground: oklch(0.48 0.012 260);
+  --accent: oklch(0.95 0.006 260);
+  --accent-foreground: oklch(0.22 0.01 260);
+  --destructive: oklch(0.58 0.22 27);
+  --border: oklch(0.91 0.005 260);
+  --input: oklch(0.88 0.006 260);
+  --ring: color-mix(in oklab, var(--brand) 60%, transparent);
+  --sidebar: oklch(1 0 0 / 0.7);
+
+  /* status tones (badges, charts) */
+  --tone-green: oklch(0.6 0.15 152);
+  --tone-amber: oklch(0.72 0.16 70);
+  --tone-red: oklch(0.6 0.21 27);
+  --tone-blue: oklch(0.58 0.16 255);
+  --tone-violet: oklch(0.56 0.19 295);
+  --tone-grey: oklch(0.6 0.01 260);
+
+  /* chart series — validated CVD-safe categorical order (dataviz reference palette) */
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
+  --chart-5: #e87ba4;
+  --chart-6: #008300;
+  --chart-7: #6250d6;
+  --chart-8: #e34948;
+  --chart-grid: oklch(0.92 0.004 260);
+}
+
+.dark {
+  --background: oklch(0.16 0.008 260);
+  --foreground: oklch(0.95 0.004 260);
+  --card: oklch(0.21 0.01 260 / 0.72);
+  --card-solid: oklch(0.21 0.01 260);
+  --popover: oklch(0.22 0.01 260);
+  --popover-foreground: var(--foreground);
+  --secondary: oklch(0.27 0.01 260);
+  --secondary-foreground: oklch(0.95 0.004 260);
+  --muted: oklch(0.26 0.01 260);
+  --muted-foreground: oklch(0.7 0.012 260);
+  --accent: oklch(0.28 0.012 260);
+  --accent-foreground: oklch(0.96 0.004 260);
+  --border: oklch(1 0 0 / 0.09);
+  --input: oklch(1 0 0 / 0.14);
+  --sidebar: oklch(0.19 0.01 260 / 0.75);
+  --tone-green: oklch(0.72 0.15 152);
+  --tone-amber: oklch(0.8 0.15 75);
+  --tone-red: oklch(0.7 0.19 25);
+  --tone-blue: oklch(0.7 0.14 255);
+  --tone-violet: oklch(0.7 0.16 295);
+  --tone-grey: oklch(0.7 0.01 260);
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
+  --chart-5: #d55181;
+  --chart-6: #008300;
+  --chart-7: #9085e9;
+  --chart-8: #e66767;
+  --chart-grid: oklch(1 0 0 / 0.08);
 }
 
 @theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-solid: var(--card-solid);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-tone-green: var(--tone-green);
+  --color-tone-amber: var(--tone-amber);
+  --color-tone-red: var(--tone-red);
+  --color-tone-blue: var(--tone-blue);
+  --color-tone-violet: var(--tone-violet);
+  --color-tone-grey: var(--tone-grey);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "tnum" 1, "cv11" 1;
+  }
+  /* soft brand glow behind glass cards */
+  .app-bg {
+    background:
+      radial-gradient(1200px 500px at 100% -10%, color-mix(in oklab, var(--brand) 9%, transparent), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, color-mix(in oklab, var(--tone-blue) 7%, transparent), transparent 60%),
+      var(--background);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility glass {
+  background-color: var(--card);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
 }
