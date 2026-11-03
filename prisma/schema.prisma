@@ -301,6 +301,7 @@ model User {
   activityLogs       ActivityLog[]
   remindersAssigned  Reminder[]      @relation("ReminderAssignee")
   offerStatusChanges OfferStatusHistory[]
+  leadStageChanges   LeadStageHistory[]
 
   @@index([role, isActive])
 }
@@ -479,7 +480,7 @@ model Lead {
   lostReason        String?
   nextFollowUpDate  DateTime?  @db.Date
   ownerId           String?
-  convertedClientId String?    @unique
+  convertedClientId String?
   convertedAt       DateTime?
   createdById       String?
   createdAt         DateTime   @default(now())
@@ -492,13 +493,32 @@ model Lead {
   convertedClient Client?     @relation(fields: [convertedClientId], references: [id])
   offers          Offer[]
   communications  CommunicationLog[]
+  stageHistory    LeadStageHistory[]
 
   @@index([stage])
+  @@index([convertedClientId])
   @@index([nextFollowUpDate])
   @@index([sectorId])
   @@index([leadSourceId])
   @@index([phone])
   @@index([email])
+}
+
+/// Every stage change of a lead, with who changed it and when.
+model LeadStageHistory {
+  id          String     @id @default(cuid())
+  leadId      String
+  fromStage   LeadStage?
+  toStage     LeadStage
+  note        String?
+  changedById String?
+  createdAt   DateTime   @default(now())
+
+  lead      Lead  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  changedBy User? @relation(fields: [changedById], references: [id])
+
+  @@index([leadId])
+  @@index([toStage, createdAt])
 }
 
 model Client {
@@ -531,7 +551,7 @@ model Client {
   leadSource      LeadSource?  @relation(fields: [leadSourceId], references: [id])
   accountManager  User?        @relation("AccountManager", fields: [accountManagerId], references: [id])
   contacts        ClientContact[]
-  lead            Lead?
+  leads           Lead[]
   offers          Offer[]
   projects        Project[]
   tasks           Task[]
@@ -567,6 +587,7 @@ model ClientContact {
   isPrimary   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  archivedAt  DateTime?
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 

@@ -19,6 +19,9 @@ import {
 
 export type NavItem = { key: string; label: string; href: string; icon: LucideIcon; phase: number };
 
+/** Sections up to this phase are built. Later ones show a small "P4" style badge. */
+export const CURRENT_PHASE = 2;
+
 /** Sidebar order from the brief. `phase` = when the section gets built. */
 export const NAV: NavItem[] = [
   { key: "dashboard", label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, phase: 1 },

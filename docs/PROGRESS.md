@@ -48,14 +48,51 @@
 See `docs/DECISIONS.md` → D-09.
 
 ### Known issues / limitations
-- Links from the dashboard to clients, tasks, invoices etc. open "Coming in Phase N" pages
-  until those screens are built.
+- Links from the dashboard to tasks, invoices etc. open "Coming in Phase N" pages until those
+  screens are built.
 - The alerts list is calculated live. The stored daily reminder job, notification bell list
   and email digest come in Phase 6. Snoozes made now carry over (same keys).
-- Won/Lost leads "in period" uses the lead's last-updated date (there is no stage history
-  table yet; added with Leads in Phase 2).
 - The IP rate limit lives in server memory (per server). The database account lock works everywhere.
 - The `prisma` seed config in package.json shows a deprecation notice (harmless until Prisma 7).
-- Not yet pushed to GitHub: waiting for GitHub access to `rezonestdevelopers/rezonest-worky`.
 
-## Phase 2: Leads, Clients, master data, Excel import ⏳ (not started)
+## Phase 2: Leads, Clients, master data, Excel import ✅ (03 Nov 2026)
+
+### Done
+- **Leads**: list with search (phone numbers match however they were typed), filters, sort,
+  paging, column picker and Excel export. Add and edit forms. Detail page with one-tap call,
+  WhatsApp and email, stage history and offers. Lost needs a reason, a Lost lead can be reopened,
+  and archive/restore is available.
+- **Convert lead to client**: details are carried across and GST is checked. It warns if the
+  phone, email or GSTIN already exists, and offers "Link to this client". The lead becomes Won,
+  and its offers and notes move to the client. A lead can only be converted once, even if
+  clicked several times at the same moment.
+- **Clients**: list, forms, one primary contact plus any number of others. All 14 tabs exist.
+  Overview, contacts and Activity work fully. The others show recorded data read-only until their
+  own phase. Invoices, Payments, Expenses and outstanding amounts are hidden from non-finance roles.
+- **Archive safety**: a client with unpaid invoices or a running project can't be archived,
+  because the outstanding total on the dashboard would quietly become wrong.
+- **Excel/CSV import** for leads and clients: template download, preview with errors, warnings and
+  duplicates, tick to import a duplicate anyway. All-or-nothing save, 5 MB / 2,000 rows.
+- **Service catalogue** (Settings): price, GST, SAC, billing type, revisions, default KPIs and
+  deliverables, sub-services, and task templates with reorderable steps.
+- **Lists** (Settings): sectors, lead sources and departments. Add, rename, switch off.
+- **Dashboard**: Won/Lost "in period" now uses real stage history. Follow-up alerts open the client.
+- **Fixed from Phase 1**: logo upload failed above 1 MB although 2 MB was promised. The dashboard's
+  "Clear" sometimes did nothing. The sidebar no longer pre-fetches all 15 sections on each page load.
+- **Database**: added `LeadStageHistory` and `ClientContact.archivedAt`. One client can now have
+  several leads. Additive only; existing leads got a starting history row.
+- **Tests**: 196 unit + integration tests (113 new), 23 end-to-end browser tests (13 new). All passing.
+
+### Known issues / limitations
+- Import matches columns by heading name. There is no screen to map unusual headings by hand;
+  unrecognised columns are listed in the preview and ignored.
+- If a client's state is blank and there is no GSTIN, import assumes Maharashtra and shows a
+  warning on that row.
+- Settings → Agency & rules still checks fields when you leave them, so the Save bar can move
+  under the mouse in rare cases (see D-15). The Phase 2 forms don't do this.
+- Client tabs show the latest 50 records, without paging, until each section's own phase.
+- Editing a record that already has a known duplicate shows the warning on each save.
+- Duplicate lookup loads all clients and leads into memory. Fine for thousands of records.
+- Not yet on GitHub: this copy has no remote configured.
+
+## Phase 3: Offers ⏳ (not started)

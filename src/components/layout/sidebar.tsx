@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { NAV } from "./nav";
+import { CURRENT_PHASE, NAV } from "./nav";
 
 export function SidebarNav({ allowed, onNavigate }: { allowed: string[]; onNavigate?: () => void }) {
   const pathname = usePathname();
@@ -17,6 +17,8 @@ export function SidebarNav({ allowed, onNavigate }: { allowed: string[]; onNavig
           <Link
             key={item.key}
             href={item.href}
+            // Pre-fetching all 15 sections cost about 15 extra server requests on every page load.
+            prefetch={false}
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={cn(
@@ -28,7 +30,7 @@ export function SidebarNav({ allowed, onNavigate }: { allowed: string[]; onNavig
           >
             <Icon className={cn("size-4 shrink-0", active ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
             <span className="flex-1 truncate">{item.label}</span>
-            {item.phase > 1 && (
+            {item.phase > CURRENT_PHASE && (
               <span className="rounded bg-muted px-1.5 text-[10px] font-normal text-muted-foreground" title={`Coming in Phase ${item.phase}`}>
                 P{item.phase}
               </span>

@@ -64,6 +64,7 @@ async function main() {
     db.offerMilestone.deleteMany(),
     db.offerItem.deleteMany(),
     db.offer.deleteMany(),
+    db.leadStageHistory.deleteMany(),
     db.lead.deleteMany(),
     db.clientContact.deleteMany(),
     db.client.deleteMany(),

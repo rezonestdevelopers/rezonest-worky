@@ -96,3 +96,40 @@ checked by magic bytes, not just the file extension.
 `date-fns-tz`), `decimal.js`, `cmdk`, `radix-ui`, `class-variance-authority`, `clsx`,
 `tailwind-merge`, `tw-animate-css`, `next-themes`, `sonner` (toasts), `geist` (font),
 `@aws-sdk/client-s3`, `server-only`, `tsx` (seed runner). `qrcode` will be added in Phase 7.
+
+### D-14 Don't use route `loading.tsx`; use `<Suspense>` inside the page
+With a route `loading.tsx`, in-page navigation sometimes never finished: the server answered but the
+page stayed as it was. Measured on client tabs: 7 of 60 clicks lost with the file, 0 of 60 without it.
+It also would have replaced the search box while typing. Loading states use `<Suspense>` around the
+data instead. The exact cause inside Next.js 15.5 was not identified.
+
+### D-15 Validate forms on submit, then as you type (not on blur)
+With "validate on blur", clicking Save first removes the error text, the button moves about 38 px
+and the click misses. New forms use the default mode. Settings (Phase 1) still uses blur.
+
+### D-16 All list navigation goes through one path
+A list's "Clear" going to the bare address (`/leads`) was ignored in up to 4 of 75 actions, even
+though the server had answered. Sending it the same way as searches and filters (`/leads?`) gave
+0 of 225. The mechanism inside Next.js was not identified, so keep using `navigate()` in
+`ListToolbar`, and the same form in the dashboard's filters.
+
+### D-17 Lists are server-driven, with the view in the URL
+Searching, sorting and paging happen in the database, so only one page reaches the browser, and
+links and the back button keep the view. Sort columns are a fixed allow-list.
+
+### D-18 Duplicate checks warn rather than block
+Same phone (last 10 digits), email (ignoring case) or GSTIN gives a warning you can override, since
+one company can have two branches. The import preview and final save run the same check, and the
+server repeats it at save time.
+
+### D-19 Won only through conversion
+A lead can't be set to Won by hand, so every Won lead has a client. Converted leads stay Won.
+
+### D-20 GST details are rejected rather than guessed
+A GSTIN must match the selected state, and a PAN must match the GSTIN. Clients abroad use state
+code 96 and can't have a GSTIN. In import, a blank state is taken from the GSTIN, otherwise
+Maharashtra with a visible warning. An unknown state is an error. Dates are always read day first.
+
+### D-21 pnpm 11 settings
+Allowed build scripts moved to `pnpm-workspace.yaml`. pnpm's 24-hour new-package safety rule stays
+on. The one package it flagged, `@vitejs/plugin-react`, was unused and was removed.

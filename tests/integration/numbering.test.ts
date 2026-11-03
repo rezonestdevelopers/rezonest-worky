@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { nextDocNumber, nextSequence } from "@/lib/numbering";
 
 const db = new PrismaClient();
+// This file and phase2.test.ts share one test database, so they run one after the other (see vitest.config.ts).
 
 beforeEach(async () => {
   await db.numberSequence.deleteMany();

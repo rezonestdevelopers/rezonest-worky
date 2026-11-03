@@ -184,7 +184,7 @@ export async function getPipeline(scope: Scope) {
     // Won/Lost: only those that closed in the selected period
     db.lead.groupBy({
       by: ["stage"],
-      where: { ...leadWhere, stage: { in: ["WON", "LOST"] }, updatedAt: range },
+      where: { ...leadWhere, stage: { in: ["WON", "LOST"] }, stageHistory: { some: { toStage: { in: ["WON", "LOST"] }, createdAt: range } } },
       _count: true,
       _sum: { approxBudget: true },
     }),

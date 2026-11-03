@@ -1,0 +1,8 @@
+# Packages allowed to run install scripts (pnpm 11 reads this here, not from package.json)
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": true
+  prisma: true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true

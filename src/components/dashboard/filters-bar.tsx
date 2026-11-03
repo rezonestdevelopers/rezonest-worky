@@ -78,7 +78,7 @@ export function FiltersBar({
       {dim("dept", "Departments", options.departments)}
       {dim("emp", "Employees", options.employees)}
       {active && (
-        <Button variant="ghost" size="sm" onClick={() => startTransition(() => router.replace(pathname, { scroll: false }))}>
+        <Button variant="ghost" size="sm" onClick={() => startTransition(() => router.replace(`${pathname}?`, { scroll: false }))}>
           <X /> Clear
         </Button>
       )}

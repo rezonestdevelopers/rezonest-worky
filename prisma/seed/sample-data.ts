@@ -383,6 +383,14 @@ export async function seedSampleData(db: PrismaClient, adminId: string) {
         convertedAt: l.convertTo ? at(k(l.created + 12)) : null,
         createdById: adminId,
         createdAt: at(k(l.created), 10),
+        stageHistory: {
+          create: [
+            { toStage: "NEW", changedById: adminId, createdAt: at(k(l.created), 10) },
+            ...(l.stage !== "NEW"
+              ? [{ fromStage: "NEW" as const, toStage: l.stage!, note: l.lost ?? (l.convertTo ? "Converted to client" : null), changedById: adminId, createdAt: at(k(l.created + 8), 12) }]
+              : []),
+          ],
+        },
       },
     });
     if (l.offer) {

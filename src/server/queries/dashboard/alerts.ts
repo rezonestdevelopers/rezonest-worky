@@ -119,7 +119,7 @@ export async function getAlerts(scope: Scope, opts: { money: boolean; settings: 
     }),
     db.communicationLog.findMany({
       where: { nextActionDate: { lte: today, gte: keyToDate(addDaysKey(T, -14)) }, nextAction: { not: null }, client: scope.clientWhere },
-      select: { id: true, nextAction: true, nextActionDate: true, client: { select: { companyName: true } } },
+      select: { id: true, clientId: true, nextAction: true, nextActionDate: true, client: { select: { companyName: true } } },
     }),
   ]);
 
@@ -267,7 +267,7 @@ export async function getAlerts(scope: Scope, opts: { money: boolean; settings: 
     alerts.push({
       key: `COMMUNICATION_NEXT_ACTION:${c.id}`, type: "COMMUNICATION_NEXT_ACTION", category: "follow_up", severity: due < T ? "WARNING" : "INFO",
       title: c.nextAction!, detail: `${c.client?.companyName ?? ""} · ${due < T ? `was due ${formatDateKey(due)}` : "due today"}`,
-      href: "/clients", entityType: "CommunicationLog", entityId: c.id, dateKey: due,
+      href: c.clientId ? `/clients/${c.clientId}?tab=communication` : "/clients", entityType: "CommunicationLog", entityId: c.id, dateKey: due,
     });
   }
 

@@ -3,7 +3,7 @@
 Internal agency management system for **Rezonest Digital & Services**, Bhosari, Pune.
 Leads → offers → projects → tasks → GST invoices → payments, all in one place.
 
-> Status: **Phase 1 done** (setup, full database, login, settings, complete dashboard).
+> Status: **Phase 2 done** (leads, clients, service catalogue, task templates, Excel import).
 > See [`docs/PROGRESS.md`](docs/PROGRESS.md) for what's built and what's next.
 
 ---
@@ -77,7 +77,7 @@ the terminal where `pnpm dev` runs (until email/SMTP is set up).
 | `pnpm dev` | Run locally with live reload |
 | `pnpm check` | Lint + type-check + all tests + production build (run before every release) |
 | `pnpm test` | Unit tests + database integration tests (needs the `rezonest_workos_test` DB) |
-| `pnpm test:e2e` | Browser tests (builds and starts the app on port 3100) |
+| `pnpm test:e2e` | Browser tests (builds and starts the app on port 3100). The first time, run `pnpm exec playwright install chromium`. Point `DATABASE_URL` at a seeded test database, because these tests add records |
 | `pnpm db:migrate` | Create a new migration after changing `prisma/schema.prisma` (developers) |
 | `pnpm db:deploy` | Apply migrations (use on the server) |
 | `pnpm db:seed` | Master data + admin + sample data (sample only if there are no clients yet) |
@@ -123,6 +123,10 @@ pg_restore --clean --no-owner --dbname "$DATABASE_URL" rezonest-2026-11-02.dump
   Numbers restart each 1 April and are never reused. Changes affect future documents only.
 - **Change the brand colour?** Settings → *Branding*, or edit `--brand` in `src/app/globals.css`.
 - **Add a new employee?** The Team screen arrives in Phase 4. For now, the sample employees show how it will look.
+- **Bring in my existing clients or leads?** Clients (or Leads) → *Import* → *Download template*, fill it in, upload it.
+  You see a preview with errors and possible duplicates first. Nothing is saved until you click Import.
+- **Change a service's price, GST rate, SAC code or task steps?** Settings → *Service catalogue*.
+- **Add a sector, lead source or department?** Settings → *Sectors, sources & departments*. Items are switched off, never deleted.
 
 ## 7. Project layout
 
