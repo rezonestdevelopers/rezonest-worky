@@ -1,7 +1,7 @@
 import { requireUser } from "@/lib/auth-guard";
 import { can, NAV_PERMISSION } from "@/lib/permissions";
 import { db } from "@/lib/db";
-import { keyToDate, todayKey, addDaysKey } from "@/lib/dates";
+import { formatDateTime, keyToDate, todayKey, addDaysKey } from "@/lib/dates";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { CommandPalette } from "@/components/layout/command-palette";
@@ -36,7 +36,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const allowed = Object.entries(NAV_PERMISSION)
     .filter(([, perm]) => can(user.role, perm))
     .map(([key]) => key);
-  const count = await attentionCount(user.id, user.role === "ADMIN");
+  const [count, unread] = await Promise.all([
+    attentionCount(user.id, user.role === "ADMIN"),
+    db.notification.findMany({ where: { userId: user.id, readAt: null }, orderBy: { createdAt: "desc" }, take: 8 }),
+  ]);
+  const bellItems = unread.map((n) => ({ id: n.id, title: n.title, body: n.body, href: n.href, when: formatDateTime(n.createdAt) }));
 
   return (
     <div className="app-bg flex min-h-dvh">
@@ -51,7 +55,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <CommandPalette allowed={allowed} />
           </div>
           <QuickAdd allowed={allowed} />
-          <NotificationBell count={count} />
+          <NotificationBell count={count} items={bellItems} />
           <ThemeToggle />
           <UserMenu name={user.name} email={user.email} role={user.role} canSettings={can(user.role, "settings.manage")} />
         </header>

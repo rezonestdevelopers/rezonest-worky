@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Archive, ArchiveRestore, Pencil } from "lucide-react";
+import { Archive, ArchiveRestore, FilePlus2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmButton } from "@/components/shared/confirm-button";
 import { setClientArchivedAction } from "@/server/actions/clients";
@@ -21,6 +21,9 @@ export function ClientActions({ id, archived }: { id: string; archived: boolean 
   }
   return (
     <>
+      <Button size="sm" asChild>
+        <Link href={`/offers/new?client=${id}`}><FilePlus2 /> New offer</Link>
+      </Button>
       <Button variant="outline" size="sm" asChild>
         <Link href={`/clients/${id}/edit`}><Pencil /> Edit</Link>
       </Button>

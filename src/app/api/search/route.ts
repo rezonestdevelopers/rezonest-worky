@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
       : [],
     sales
       ? db.offer.findMany({
-          where: { archivedAt: null, OR: [{ number: contains }, { title: contains }, { client: { companyName: contains } }, { lead: { companyName: contains } }] },
+          where: { archivedAt: null, isTemplate: false, OR: [{ number: contains }, { title: contains }, { client: { companyName: contains } }, { lead: { companyName: contains } }] },
           select: { id: true, number: true, title: true, status: true },
           orderBy: { offerDate: "desc" },
           take,

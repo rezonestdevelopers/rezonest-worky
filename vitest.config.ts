@@ -18,7 +18,7 @@ export default defineConfig({
           name: "integration",
           include: ["tests/integration/**/*.test.ts"],
           environment: "node",
-          env: { DATABASE_URL: TEST_DB },
+          env: { DATABASE_URL: TEST_DB, AUTH_SECRET: "test-only-secret" },
           globalSetup: ["tests/integration/global-setup.ts"],
           pool: "forks",
           poolOptions: { forks: { singleFork: true } },

@@ -11,6 +11,34 @@ test("dashboard works on a phone without sideways scrolling", async ({ page }) =
   await expect(page).toHaveURL(/\/settings/);
 });
 
+test("Phase 3 screens work on a phone, including the client's page", async ({ page, browser }) => {
+  await login(page);
+  const noOverflow = async (p = page) => {
+    await p.waitForLoadState("networkidle");
+    expect(await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1), p.url()).toBe(false);
+  };
+  for (const path of ["/offers", "/offers/new", "/offers/templates", "/offers/new?template=x"]) {
+    await page.goto(path);
+    await noOverflow();
+  }
+  await page.goto("/offers?status=SENT");
+  await page.getByRole("link", { name: /REZ\/QT/ }).first().click();
+  await expect(page).toHaveURL(/\/offers\/c/);
+  await noOverflow();
+  await page.getByRole("button", { name: "Share" }).click();
+  const link = new URL(await page.getByTestId("client-link").inputValue()).pathname;
+
+  const ctx = await browser.newContext({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
+  const client = await ctx.newPage();
+  await client.goto(link);
+  const accept = client.getByRole("button", { name: "Accept this offer" });
+  await expect(accept).toBeVisible();
+  // Big enough to tap with a thumb
+  expect((await accept.boundingBox())!.height).toBeGreaterThanOrEqual(36);
+  await noOverflow(client);
+  await ctx.close();
+});
+
 test("Phase 2 screens work on a phone without sideways scrolling", async ({ page }) => {
   await login(page);
   const noOverflow = async () => {

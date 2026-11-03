@@ -15,11 +15,13 @@ export async function sendMail(opts: {
   templateKey?: string;
   entityType?: string;
   entityId?: string;
+  attachments?: { filename: string; content: Buffer; contentType: string }[];
 }): Promise<{ ok: boolean; error?: string }> {
   const host = process.env.SMTP_HOST;
   try {
     if (!host) {
-      console.log(`\n──── EMAIL (console mode) ────\nTo: ${opts.to}\nSubject: ${opts.subject}\n\n${opts.text}\n──────────────────────────────\n`);
+      const files = opts.attachments?.length ? `\nAttachments: ${opts.attachments.map((a) => a.filename).join(", ")}` : "";
+      console.log(`\n──── EMAIL (console mode) ────\nTo: ${opts.to}\nSubject: ${opts.subject}${files}\n\n${opts.text}\n──────────────────────────────\n`);
     } else {
       const transporter = nodemailer.createTransport({
         host,
@@ -27,7 +29,7 @@ export async function sendMail(opts: {
         secure: Number(process.env.SMTP_PORT) === 465,
         auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD },
       });
-      await transporter.sendMail({ from: process.env.SMTP_FROM, to: opts.to, subject: opts.subject, text: opts.text, html: opts.html });
+      await transporter.sendMail({ from: process.env.SMTP_FROM, to: opts.to, subject: opts.subject, text: opts.text, html: opts.html, attachments: opts.attachments });
     }
     await db.emailLog.create({
       data: { to: opts.to, subject: opts.subject, templateKey: opts.templateKey, entityType: opts.entityType, entityId: opts.entityId, status: "sent" },

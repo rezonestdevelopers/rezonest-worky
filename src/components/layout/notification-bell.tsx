@@ -1,19 +1,49 @@
+"use client";
+
+import { useTransition } from "react";
 import Link from "next/link";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { markNotificationsReadAction } from "@/server/actions/notifications";
 
-/** Phase 1: shows the count of unread notifications; full bell menu arrives in Phase 6. */
-export function NotificationBell({ count }: { count: number }) {
+export type BellItem = { id: string; title: string; body: string | null; href: string | null; when: string };
+
+/** The badge also counts today's alerts. The full notification centre arrives in Phase 6. */
+export function NotificationBell({ count, items }: { count: number; items: BellItem[] }) {
+  const [, start] = useTransition();
   return (
-    <Button variant="ghost" size="icon" asChild aria-label={`Notifications${count ? ` (${count} unread)` : ""}`}>
-      <Link href="/dashboard#alerts" className="relative">
-        <Bell />
-        {count > 0 && (
-          <span className="absolute top-1 right-1 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-4 font-semibold text-primary-foreground">
-            {count > 99 ? "99+" : count}
-          </span>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative" aria-label={`Notifications${count ? ` (${count} need attention)` : ""}`}>
+          <Bell />
+          {count > 0 && (
+            <span className="absolute top-1 right-1 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-4 font-semibold text-primary-foreground">
+              {count > 99 ? "99+" : count}
+            </span>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-80 max-w-[calc(100vw-2rem)]">
+        <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+        {items.length === 0 && <p className="px-2 py-2 text-sm text-muted-foreground">No new notifications.</p>}
+        {items.map((n) => (
+          <DropdownMenuItem key={n.id} asChild>
+            <Link href={n.href ?? "/dashboard"} onClick={() => start(() => markNotificationsReadAction(n.id))} className="flex-col items-start gap-0.5">
+              <span className="font-medium">{n.title}</span>
+              {n.body && <span className="line-clamp-2 text-xs text-muted-foreground">{n.body}</span>}
+              <span className="text-[11px] text-muted-foreground">{n.when}</span>
+            </Link>
+          </DropdownMenuItem>
+        ))}
+        {items.length > 0 && (
+          <DropdownMenuItem onSelect={() => start(() => markNotificationsReadAction())}>Mark all as read</DropdownMenuItem>
         )}
-      </Link>
-    </Button>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/dashboard#alerts">See today&apos;s alerts</Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

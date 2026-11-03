@@ -618,7 +618,10 @@ model Offer {
   taxableTotal   Decimal     @default(0) @db.Decimal(14, 2)
   taxTotal       Decimal     @default(0) @db.Decimal(14, 2)
   grandTotal     Decimal     @default(0) @db.Decimal(14, 2)
+  taxMode        TaxMode     @default(INTRA_STATE)
+  supplyStateCode String?    // state GST is worked out for; a lead has no state of its own
   // acceptance capture
+  acceptedVersion Int?
   acceptedAt     DateTime?
   acceptedByName String?
   acceptedIp     String?

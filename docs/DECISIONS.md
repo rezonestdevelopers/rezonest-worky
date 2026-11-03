@@ -133,3 +133,36 @@ Maharashtra with a visible warning. An unknown state is an error. Dates are alwa
 ### D-21 pnpm 11 settings
 Allowed build scripts moved to `pnpm-workspace.yaml`. pnpm's 24-hour new-package safety rule stays
 on. The one package it flagged, `@vitejs/plugin-react`, was unused and was removed.
+
+### D-22 Client links
+A link's token is an HMAC of its id with `AUTH_SECRET`, and only a SHA-256 of the token is stored.
+That means a database copy alone can't produce a working link, and the same link can be shared
+again later. Changing `AUTH_SECRET` stops existing links working. A link shows one offer only, is
+rate limited, and stops on expiry, rejection, archiving or a new version.
+
+### D-23 Offer totals are per month for retainers
+A retainer line is quantity × rate for one month. Duration is shown but not multiplied, so a
+6-month ₹25,000 retainer totals ₹25,000 + GST, and the offer says so. This matches how MRR and
+monthly invoices work. Revisit if you'd rather quote the whole contract value.
+
+### D-24 Drafts only are editable; a change to a sent offer is a new version
+A new version keeps the quotation number and revokes old links first, so a client can never accept
+terms that have since changed. Each sent version is frozen in `OfferVersion`, and the accepted
+version is recorded. Accepted offers can't be revised or archived.
+
+### D-25 Sent means actually sent
+The email goes first, and the status changes only if it succeeded. Tax is re-worked out from the
+client's current state just before sending.
+
+### D-26 Quotation numbers are given at creation
+Offers are archived, never deleted, so a number is never lost. Templates use a `TPL-` code and
+consume no number. (Invoices differ: they get a number only when issued, per D-03.)
+
+### D-27 Managers and offer prices
+The brief gives Managers access to Offers but not to Prices. An offer can't be written without
+prices, so Managers can see and set them on offers. The price catalogue stays Admin only. Manager
+logins aren't in use yet, so this can be revisited.
+
+### D-28 PDF library and font
+`@react-pdf/renderer`, as named in the brief. Built-in PDF fonts lack the ₹ sign, so Geist is
+embedded from `src/lib/pdf/fonts`.

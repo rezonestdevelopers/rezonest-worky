@@ -85,7 +85,7 @@ export async function ClientTab({ tab, clientId }: { tab: string; clientId: stri
           columns={["Number", "Title", "Status", "Date", "Valid until", "Value (excl. GST)"]}
           rows={rows.map((o) => ({
             key: o.id,
-            cells: [o.number, clip(o.title), <StatusBadge key="s" kind="offer" value={o.status} />, formatDateKey(o.offerDate), formatDateKey(o.validUntil), amount(o.taxableTotal)],
+            cells: [<Link key="n" href={`/offers/${o.id}`} className="font-medium hover:underline">{o.number}</Link>, clip(o.title), <StatusBadge key="s" kind="offer" value={o.status} />, formatDateKey(o.offerDate), formatDateKey(o.validUntil), amount(o.taxableTotal)],
           }))}
         />
       );

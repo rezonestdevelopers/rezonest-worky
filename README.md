@@ -3,7 +3,7 @@
 Internal agency management system for **Rezonest Digital & Services**, Bhosari, Pune.
 Leads → offers → projects → tasks → GST invoices → payments, all in one place.
 
-> Status: **Phase 2 done** (leads, clients, service catalogue, task templates, Excel import).
+> Status: **Phase 3 done** (offers, PDF, email and WhatsApp sharing, client accept link, versions, templates).
 > See [`docs/PROGRESS.md`](docs/PROGRESS.md) for what's built and what's next.
 
 ---
@@ -90,6 +90,18 @@ The integration tests use a separate database called `rezonest_workos_test`. Cre
 ```bash
 createdb -U rezonest rezonest_workos_test
 ```
+
+### Scheduled jobs
+
+Call this once a day, with `CRON_SECRET` from `.env`:
+
+```bash
+curl -H "Authorization: Bearer YOUR_CRON_SECRET" https://your-app/api/cron/expire-offers
+```
+
+On Vercel, add it under Cron Jobs. On a VPS, add it to cron. It moves offers past their validity to Expired, and running it twice is safe.
+
+**Keep `AUTH_SECRET` and `APP_URL` correct when going live.** Client offer links are built from them, so changing `AUTH_SECRET` later stops existing links working.
 
 ## 4. Going live (summary, full guide in Phase 10)
 

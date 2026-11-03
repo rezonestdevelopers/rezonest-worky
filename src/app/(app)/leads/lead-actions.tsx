@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Archive, ArchiveRestore, Loader2, Pencil, UserCheck } from "lucide-react";
+import { Archive, ArchiveRestore, FilePlus2, Loader2, Pencil, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -74,6 +74,11 @@ export function LeadActions({
       {!converted && (
         <Button size="sm" asChild>
           <Link href={`/leads/${id}/convert`}><UserCheck /> Convert to client</Link>
+        </Button>
+      )}
+      {!converted && (
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/offers/new?lead=${id}`}><FilePlus2 /> New offer</Link>
         </Button>
       )}
       <Button variant="outline" size="sm" asChild>

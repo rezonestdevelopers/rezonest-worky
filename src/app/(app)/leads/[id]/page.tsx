@@ -129,12 +129,12 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
             <CardHeader><CardTitle>Offers</CardTitle></CardHeader>
             <CardContent>
               {lead.offers.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No offers yet. Creating offers arrives in Phase 3.</p>
+                <p className="text-sm text-muted-foreground">No offers yet.</p>
               ) : (
                 <ul className="divide-y">
                   {lead.offers.map((o) => (
                     <li key={o.id} className="py-2 text-sm">
-                      <div className="truncate font-medium">{o.title}</div>
+                      <Link href={`/offers/${o.id}`} className="block truncate font-medium hover:underline">{o.title}</Link>
                       <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                         <StatusBadge kind="offer" value={o.status} /> {o.number} · {formatDateKey(o.offerDate)}
                       </div>

@@ -479,7 +479,63 @@ export async function seedMasterData(db: PrismaClient) {
     });
   }
 
+  if ((await db.offer.count({ where: { isTemplate: true } })) === 0) await seedOfferTemplates(db);
+
   for (const t of EMAIL_TEMPLATES) {
     await db.emailTemplate.upsert({ where: { key: t.key }, update: {}, create: t });
+  }
+}
+
+/** Two ready-made packages, so "Start from a template" has something in it from day one. */
+async function seedOfferTemplates(db: PrismaClient) {
+  const services = await db.service.findMany({ include: { subServices: true } });
+  const by = (slug: string) => services.find((s) => s.slug === slug);
+  const today = new Date(new Date().toISOString().slice(0, 10));
+  const packages = [
+    {
+      templateName: "Starter Social Media Package",
+      title: "Social media management",
+      durationMonths: 6,
+      paymentTerms: "Monthly in advance, due within 15 days of invoice",
+      item: { slug: "social-media", description: "Social media management: Instagram and Facebook", billingType: "MONTHLY_RETAINER" as const, unit: "month", rate: 20000, deliverables: [{ format: "STATIC_POST", qtyPerMonth: 12 }, { format: "REEL", qtyPerMonth: 4 }], durationMonths: 6 },
+      milestones: [] as { name: string; percent: number }[],
+    },
+    {
+      templateName: "Business Website",
+      title: "Business website",
+      durationMonths: null,
+      paymentTerms: "50% advance, 30% on design approval, 20% before launch",
+      item: { slug: "web-dev", description: "WordPress business website, up to 10 pages", billingType: "MILESTONE" as const, unit: "project", rate: 45000, deliverables: undefined, durationMonths: null },
+      milestones: [{ name: "Advance", percent: 50 }, { name: "On design approval", percent: 30 }, { name: "Before launch", percent: 20 }],
+    },
+  ];
+  for (const [i, p] of packages.entries()) {
+    const service = by(p.item.slug);
+    if (!service) continue;
+    const gst = (p.item.rate * 18) / 100;
+    await db.offer.create({
+      data: {
+        number: `TPL-starter-${i + 1}`,
+        isTemplate: true,
+        templateName: p.templateName,
+        title: p.title,
+        status: "DRAFT",
+        offerDate: today,
+        validUntil: today,
+        durationMonths: p.durationMonths,
+        paymentTerms: p.paymentTerms,
+        subtotal: p.item.rate,
+        taxableTotal: p.item.rate,
+        taxTotal: gst,
+        grandTotal: p.item.rate + gst,
+        items: {
+          create: [{
+            serviceId: service.id, description: p.item.description, billingType: p.item.billingType, quantity: 1, unit: p.item.unit, rate: p.item.rate,
+            gstRate: service.gstRate, taxableValue: p.item.rate, durationMonths: p.item.durationMonths, deliverables: p.item.deliverables,
+          }],
+        },
+        milestones: { create: p.milestones.map((m, n) => ({ name: m.name, percent: m.percent, sortOrder: n })) },
+      },
+    });
   }
 }

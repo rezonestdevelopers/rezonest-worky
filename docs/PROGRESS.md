@@ -93,6 +93,37 @@ See `docs/DECISIONS.md` → D-09.
 - Client tabs show the latest 50 records, without paging, until each section's own phase.
 - Editing a record that already has a known duplicate shows the warning on each save.
 - Duplicate lookup loads all clients and leads into memory. Fine for thousands of records.
-- Not yet on GitHub: this copy has no remote configured.
 
-## Phase 3: Offers ⏳ (not started)
+## Phase 3: Offers ✅ (03 Nov 2026)
+
+### Done
+- **Offers**: list with search, filters (status, follow-up due, expiring soon), sorting, paging and
+  Excel. A form with catalogue items, sub-services, quantity, discount (% or ₹), GST, months,
+  monthly package, payment milestones (must total 100%), payment terms and T&C.
+- **Live GST** on the form: CGST + SGST or IGST from the client's state. Leads have no state, so
+  you choose the place of supply. GST can be switched off. Clients abroad are export, with no GST.
+- **Branded PDF**, with figures from the same code as the screen and the client's page.
+- **Sending**: email with the PDF and link, or "Share myself" with a WhatsApp message and link. An
+  offer only becomes Sent after the email really went out. A follow-up date is required.
+- **Client's page** (no login): view, download PDF, Accept (name and tick box; records name, time,
+  IP and version), or Request Changes (goes On Hold and notifies you). Only that one offer is
+  visible. Links can't be guessed, are rate limited, and stop working on expiry, rejection,
+  archiving or a new version.
+- **Status flow** with full history: Draft → Sent → On Hold → Accepted / Rejected (reason) /
+  Expired (automatic). Sending moves an open lead to Offer Sent.
+- **Versions**: only drafts are edited. Changing a sent offer starts v2 with the same number and
+  the old link stops working. Every sent version is kept. Accepted offers are locked.
+- **Duplicate** and **templates**, which use no quotation number. Two starter templates are included.
+- **Bell**: lists new notifications, which can be marked as read. The full centre comes in Phase 6.
+- **Daily job**: `/api/cron/expire-offers`. The offers pages also expire overdue offers when opened.
+- **Tests**: 257 unit + integration tests (61 new), 31 end-to-end browser tests (8 new). All passing.
+
+### Known issues / limitations
+- "Convert to project" and the onboarding checklist come in Phase 4. Accepted offers wait until then.
+- Totals on retainer offers are for one month. Duration is shown but isn't multiplied (D-23).
+- Milestone percentages apply to the whole total, including one month of any retainer in the offer.
+- Email templates can't be edited on screen until Phase 6. Sent emails go to the console until SMTP is set.
+- Changing `AUTH_SECRET` makes existing client links stop working (D-22).
+- Rate limits live in server memory, so they're per server.
+
+## Phase 4: Onboarding, Projects, Tasks, Team ⏳ (not started)
