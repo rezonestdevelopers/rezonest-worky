@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { after } from "next/server";
 import { Suspense } from "react";
 import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
@@ -11,6 +12,8 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { FiltersBar } from "@/components/dashboard/filters-bar";
 import { buildScope, getFilterOptions, parseFilters, PRESETS } from "@/server/queries/dashboard/filters";
 import { getMyTasks } from "@/server/queries/dashboard/data";
+import { db } from "@/lib/db";
+import { runDailyWorkIfStale } from "@/server/services/projects";
 import { AlertsSection, ChartsGrid, ClientWorkSection, DeadlinesSection, KpiCards, Pipeline, TodayStrip } from "./sections";
 
 export const metadata: Metadata = { title: "Dashboard" };
@@ -21,6 +24,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   if (!can(user.role, "dashboard.full")) return <EmployeeDashboard userId={user.id} name={user.name} />;
 
+  after(() => runDailyWorkIfStale(db));
   const filters = parseFilters(sp);
   const [scope, options] = await Promise.all([buildScope(filters), getFilterOptions()]);
   const perms = { money: can(user.role, "dashboard.full"), profit: can(user.role, "dashboard.profit") };

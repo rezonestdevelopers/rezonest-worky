@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import type { BILLING_TYPES } from "@/lib/validators/catalogue";
 import { ServiceForm } from "../service-form";
 import { SubServicesEditor } from "../sub-services-editor";
+import { OnboardingEditor } from "../onboarding-editor";
 import { TemplatesEditor } from "../templates-editor";
 
 export const metadata: Metadata = { title: "Service" };
@@ -20,6 +21,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
     where: { id },
     include: {
       subServices: { orderBy: { sortOrder: "asc" } },
+      onboardingItems: { where: { isActive: true }, orderBy: { sortOrder: "asc" } },
       taskTemplates: { orderBy: { createdAt: "asc" }, include: { steps: { orderBy: { sortOrder: "asc" } } } },
     },
   });
@@ -81,6 +83,12 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
             isClientApproval: s.isClientApproval,
           })),
         }))}
+      />
+      <OnboardingEditor
+        serviceId={service.id}
+        title="Onboarding checklist"
+        description="Added for clients who buy this service, when their offer is accepted. Existing clients' checklists don't change."
+        items={service.onboardingItems.map((i) => i.title)}
       />
     </div>
   );

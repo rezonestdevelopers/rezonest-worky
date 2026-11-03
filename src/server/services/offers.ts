@@ -8,6 +8,7 @@ import { buildOfferDocument, type OfferDocInput } from "@/lib/offer-document";
 import { canEdit, canRevise, isOpen, publicResponseError, statusChangeError } from "@/lib/offer-status";
 import { hashPublicToken, looksLikeToken, publicToken } from "@/lib/public-token";
 import type { OfferData, TemplateData } from "@/lib/validators/offer";
+import { ensureOfferOnboarding } from "./onboarding";
 import { BusinessError, logActivity, type Db, type Tx } from "./shared";
 
 const money = (v: { toFixed(n: number): string }) => v.toFixed(2);
@@ -323,6 +324,7 @@ export async function changeOfferStatus(
     });
     if (!count) throw new BusinessError("This offer was just changed by someone else. Please reload.");
     if (input.to === "REJECTED") await revokeLinks(tx, offer.id);
+    if (input.to === "ACCEPTED") await ensureOfferOnboarding(tx, offer.id);
     await tx.offerStatusHistory.create({
       data: { offerId: offer.id, fromStatus: offer.status, toStatus: input.to, note: input.reason ?? (input.acceptedByName ? `Accepted by ${input.acceptedByName}` : null), changedById: input.actorId },
     });
@@ -512,6 +514,7 @@ export async function acceptOfferViaLink(db: Db, input: { token: string; name: s
       actorId: null, action: "offer.accepted", entityType: "Offer", entityId: offer.id, clientId: offer.clientId,
       changes: { status: { from: offer.status, to: "ACCEPTED" }, by: input.name, version: offer.currentVersion },
     });
+    await ensureOfferOnboarding(tx, offer.id);
     await notifyTeam(tx, { title: `Offer ${offer.number} accepted`, body: `${input.name} accepted “${offer.title}”.`, href: `/offers/${offer.id}` });
     return offer;
   });

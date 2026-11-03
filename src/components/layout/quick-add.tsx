@@ -15,7 +15,7 @@ const ITEMS = [
   { label: "New Lead", href: "/leads/new", icon: UserPlus, perm: "leads" },
   { label: "New Client", href: "/clients/new", icon: Users, perm: "clients" },
   { label: "New Offer", href: "/offers/new", icon: FileText, perm: "offers" },
-  { label: "New Task", href: "/tasks/new", icon: CheckSquare, perm: "tasks" },
+  { label: "New Task", href: "/tasks/new", icon: CheckSquare, perm: "work.manage" },
   { label: "New Invoice", href: "/invoices/new", icon: Receipt, perm: "invoices" },
   { label: "Record Payment", href: "/payments/new", icon: IndianRupee, perm: "payments" },
 ];

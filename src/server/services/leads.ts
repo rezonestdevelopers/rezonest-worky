@@ -4,6 +4,7 @@ import { stageChangeError, type LeadStage } from "@/lib/lead-stage";
 import type { ClientCreateData } from "@/lib/validators/client";
 import type { LeadData } from "@/lib/validators/lead";
 import { createClientInTx } from "./clients";
+import { ensureOfferOnboarding } from "./onboarding";
 import { BusinessError, diffChanges, logActivity, type Db, type Tx } from "./shared";
 
 const LEAD_FIELDS = [
@@ -121,6 +122,8 @@ export async function convertLead(
 
     await tx.offer.updateMany({ where: { leadId: lead.id, clientId: null }, data: { clientId } });
     await tx.communicationLog.updateMany({ where: { leadId: lead.id, clientId: null }, data: { clientId } });
+    const accepted = await tx.offer.findMany({ where: { leadId: lead.id, status: "ACCEPTED" }, select: { id: true } });
+    for (const offer of accepted) await ensureOfferOnboarding(tx, offer.id);
     if (lead.stage !== "WON") {
       await tx.leadStageHistory.create({
         data: { leadId: lead.id, fromStage: lead.stage, toStage: "WON", note: "Converted to client", changedById: input.actorId },

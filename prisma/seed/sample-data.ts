@@ -603,6 +603,7 @@ export async function seedSampleData(db: PrismaClient, adminId: string) {
     if (!p.retainerMonths) continue;
     const months = [shiftMonth(CUR, -1), CUR].filter((m) => m >= pr.startKey.slice(0, 7));
     for (const month of months) {
+      await db.retainerRun.create({ data: { projectId: pr.id, month } });
       const { start, end } = monthRange(`${month}-01`);
       const span = daysBetweenKeys(start, end);
       for (const ps of p.services) {

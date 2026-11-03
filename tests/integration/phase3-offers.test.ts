@@ -60,6 +60,9 @@ beforeAll(async () => {
 beforeEach(async () => {
   await db.notification.deleteMany();
   await db.publicLink.deleteMany();
+  await db.onboardingChecklist.deleteMany();
+  await db.task.deleteMany();
+  await db.project.deleteMany();
   await db.offerItem.deleteMany();
   await db.offer.deleteMany();
   await db.lead.deleteMany();

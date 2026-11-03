@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export type ListFilter = { key: string; label: string; options: { value: string; label: string }[] };
+export type ListFilter = { key: string; label: string; allLabel?: string; options: { value: string; label: string }[] };
 
 const ALL = "__all";
 
 /** Search box, filters and Excel export for a list. Everything is kept in the URL. */
-export function ListToolbar({ placeholder, filters, exportHref }: { placeholder: string; filters: ListFilter[]; exportHref?: string }) {
+export function ListToolbar({ placeholder, filters, exportHref, keep = [] }: { placeholder: string; filters: ListFilter[]; exportHref?: string; keep?: string[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
@@ -57,7 +57,7 @@ export function ListToolbar({ placeholder, filters, exportHref }: { placeholder:
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ALL}>{f.label}: all</SelectItem>
+              <SelectItem value={ALL}>{f.allLabel ?? `${f.label}: all`}</SelectItem>
               {f.options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
             </SelectContent>
           </Select>
@@ -69,7 +69,7 @@ export function ListToolbar({ placeholder, filters, exportHref }: { placeholder:
           size="sm"
           onClick={() => {
             setQ("");
-            navigate(new URLSearchParams());
+            navigate(new URLSearchParams(keep.flatMap((k) => (sp.get(k) ? [[k, sp.get(k)!]] : []))));
           }}
         >
           <X /> Clear

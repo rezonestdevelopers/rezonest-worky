@@ -54,7 +54,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <div className="flex min-w-0 flex-1">
             <CommandPalette allowed={allowed} />
           </div>
-          <QuickAdd allowed={allowed} />
+          <QuickAdd allowed={can(user.role, "work.manage") ? [...allowed, "work.manage"] : allowed} />
           <NotificationBell count={count} items={bellItems} />
           <ThemeToggle />
           <UserMenu name={user.name} email={user.email} role={user.role} canSettings={can(user.role, "settings.manage")} />

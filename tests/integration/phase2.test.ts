@@ -35,6 +35,7 @@ beforeEach(async () => {
   await db.creditNote.deleteMany();
   await db.invoiceItem.deleteMany();
   await db.invoice.deleteMany();
+  await db.onboardingChecklist.deleteMany();
   await db.task.deleteMany();
   await db.project.deleteMany();
   await db.offerItem.deleteMany();

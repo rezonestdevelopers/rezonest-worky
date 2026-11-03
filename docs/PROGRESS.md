@@ -119,11 +119,54 @@ See `docs/DECISIONS.md` → D-09.
 - **Tests**: 257 unit + integration tests (61 new), 31 end-to-end browser tests (8 new). All passing.
 
 ### Known issues / limitations
-- "Convert to project" and the onboarding checklist come in Phase 4. Accepted offers wait until then.
 - Totals on retainer offers are for one month. Duration is shown but isn't multiplied (D-23).
 - Milestone percentages apply to the whole total, including one month of any retainer in the offer.
 - Email templates can't be edited on screen until Phase 6. Sent emails go to the console until SMTP is set.
 - Changing `AUTH_SECRET` makes existing client links stop working (D-22).
 - Rate limits live in server memory, so they're per server.
 
-## Phase 4: Onboarding, Projects, Tasks, Team ⏳ (not started)
+## Phase 4: Onboarding, Projects, Tasks, Team ✅ (03 Nov 2026)
+
+### Done
+- **Onboarding checklist**: starts by itself when an offer is accepted, or when a lead with an
+  accepted offer becomes a client. Tick, add and remove items. It moves to the project on conversion.
+  Standard items are edited under Settings → Lists (every client) and on each service (D-36).
+- **Convert to project**: one click on an accepted offer copies client, services, prices and terms.
+  You set the manager, dates, retainer end (worked out from the offer), auto-renew, milestones and
+  targets. It can't happen twice, even if clicked twice at once.
+- **Projects**: list with search, filters, sorting, paging and Excel. Project page with Overview,
+  Tasks, Deliverables, Milestones, Targets, Change requests and Onboarding. Progress and health are
+  automatic, and you can override health if you give a reason.
+- **Targets vs actual**: monthly results for each target. Entering a month again corrects it.
+- **Tasks**: list, Kanban (drag on a computer, menu on a phone), calendar and My Tasks. Task page
+  with checklist, comments with @mentions, time logs, revisions and file attachments. Bulk reassign
+  and bulk status. The list opens on open tasks; "All tasks" shows finished and "Archived" the rest.
+- **Tasks from templates**: created on conversion, on working days only, one after another. Per-unit
+  items get one set per unit (D-37). Linked to a milestone when their first words match.
+- **Retainers**: each month's deliverables and tasks are created automatically on the chosen day, or
+  early by a button. A month is never created twice (D-33). Committed vs delivered per month.
+- **Change requests**: log, estimate, billable or not, approve or reject. Adding a revision past the
+  included number prompts you to log one. They can go on an invoice in Phase 7.
+- **Team**: list with workload, add person (they get a link to set their own password), edit, hourly
+  cost, deactivate with a choice of who takes their open tasks, reactivate. The last admin is protected.
+- **Employee access**: only their tasks and department's, and those projects. No prices, sales, team
+  or settings. They can change status, log time, comment and upload.
+- **In-app notifications** when a task is assigned, you're mentioned, or a task is blocked or done.
+- **Daily job**: `/api/cron/daily-work` (D-34). Pages also run it at most every 10 minutes.
+- **Tests**: 319 unit + integration tests (62 new), 38 end-to-end browser tests (7 new). All passing.
+
+### Known issues / limitations
+- A monthly package creates a lot of tasks: 12 posts + 8 reels is about 96 a month (D-29). See the
+  open question in the Phase 4 report.
+- Tasks are assigned to departments, not people, until a manager assigns them (D-31).
+- Assignment emails, the digest and reminders come in Phase 6. Phase 4 notifications are in-app only.
+- New team members and password links need SMTP to reach them. Until it's set, the email goes to the
+  server console.
+- Custom offer items with no service aren't copied to the project. The convert page warns you.
+- Working days know weekly offs, not public holidays.
+- The Kanban board shows the first 300 tasks, and says so; filters narrow it down.
+- Change request estimates are visible to Managers, as offer prices are (D-27). Payment percentages
+  show to Managers, but the rupee amounts don't.
+- Client "Change request → invoice" arrives in Phase 7, and auto-renew doesn't bill anything yet (D-35).
+
+## Phase 5: Content calendar, Meta Ads, Domain & Hosting ⏳ (not started)

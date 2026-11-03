@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Archive, CheckCircle2, XCircle } from "lucide-react";
+import { Archive, Briefcase, CheckCircle2, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { OnboardingCard } from "@/components/shared/onboarding-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OfferView } from "@/components/shared/offer-view";
 import { PageHeader } from "@/components/shared/page-header";
@@ -13,6 +15,7 @@ import { formatINR } from "@/lib/money/format";
 import { statusDef } from "@/lib/status";
 import { cn } from "@/lib/utils";
 import { getOfferHistory } from "@/server/queries/offers";
+import { ensureOfferOnboarding } from "@/server/services/onboarding";
 import { expireOverdueOffers, loadOfferDocument } from "@/server/services/offers";
 import { OfferActions } from "./offer-actions";
 
@@ -27,6 +30,12 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
   const [loaded, [history, versions, links]] = await Promise.all([loadOfferDocument(db, id), getOfferHistory(id)]);
   if (!loaded || loaded.offer.isTemplate) notFound();
   const { offer, doc } = loaded;
+  // Offers accepted before onboarding existed get their checklist the first time they're opened.
+  if (offer.status === "ACCEPTED" && offer.clientId) await db.$transaction((tx) => ensureOfferOnboarding(tx, id));
+  const [project, checklist] = await Promise.all([
+    db.project.findUnique({ where: { offerId: id }, select: { id: true, code: true } }),
+    db.onboardingChecklist.findFirst({ where: { OR: [{ offerId: id }, { project: { offerId: id } }] }, include: { items: { orderBy: { sortOrder: "asc" } } } }),
+  ]);
 
   const today = todayKey();
   const followUp = offer.followUpDate ? dateOnlyKey(offer.followUpDate) : null;
@@ -81,12 +90,15 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
               {offer.acceptedIp && ` from IP ${offer.acceptedIp}`} (version {offer.acceptedVersion ?? offer.currentVersion}).
             </span>
           </div>
-          <p className="pl-6 text-xs text-muted-foreground">
-            “Convert to project” arrives in Phase 4.
-            {!offer.clientId && offer.lead && (
-              <> This lead isn&apos;t a client yet: <Link href={`/leads/${offer.lead.id}/convert`} className="underline">convert it to a client</Link>.</>
+          <div className="flex flex-wrap items-center gap-2 pt-1 pl-6">
+            {project ? (
+              <Button variant="outline" size="sm" asChild><Link href={`/projects/${project.id}`}><Briefcase /> Open project {project.code}</Link></Button>
+            ) : offer.clientId ? (
+              <Button size="sm" asChild><Link href={`/offers/${id}/convert`}><Briefcase /> Convert to project</Link></Button>
+            ) : (
+              offer.lead && <span className="text-xs text-muted-foreground">This lead isn&apos;t a client yet. <Link href={`/leads/${offer.lead.id}/convert`} className="underline">Convert it to a client</Link> first, then come back to start the project.</span>
             )}
-          </p>
+          </div>
         </div>
       )}
       {offer.status === "REJECTED" && offer.rejectReason && (
@@ -100,6 +112,12 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
           <CardContent><OfferView doc={doc} /></CardContent>
         </Card>
         <div className="min-w-0 space-y-4">
+          {checklist && (
+            <OnboardingCard
+              checklistId={checklist.id}
+              items={checklist.items.map((i) => ({ id: i.id, title: i.title, isDone: i.isDone, doneAt: i.doneAt ? formatDateKey(dateOnlyKey(i.doneAt)) : null }))}
+            />
+          )}
           {(followUp || links.length > 0) && (
             <Card>
               <CardContent className="space-y-2 text-sm">

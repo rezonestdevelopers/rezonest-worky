@@ -166,3 +166,67 @@ logins aren't in use yet, so this can be revisited.
 ### D-28 PDF library and font
 `@react-pdf/renderer`, as named in the brief. Built-in PDF fonts lack the ₹ sign, so Geist is
 embedded from `src/lib/pdf/fonts`.
+
+### D-29 Monthly package tasks: one set per deliverable
+The brief says retainers create "deliverables and tasks" from the package, using the Reel and Post
+templates. So "12 posts + 8 reels" makes 20 deliverables and about 96 tasks a month. This gives exact
+committed vs delivered figures, but it's a lot of tasks. The owner has been asked whether one task
+per deliverable would suit them better. That would be a small change.
+
+### D-30 What an employee can see
+The brief says "Assigned / own department only". An employee sees tasks assigned to them, plus tasks
+for their department. They see a project only if they can see one of its tasks. If it isn't theirs,
+the page answers the same as if it doesn't exist, so nothing is revealed. They never see prices,
+change requests or onboarding, and can't create tasks.
+
+### D-31 Tasks start with a department, not a person
+Templates name a department, and nobody is chosen automatically, because the app can't know who is
+free. A manager assigns from the list or Kanban. Employees see their department's unassigned work.
+
+### D-32 Projects only start from an accepted offer
+The brief describes one way in: converting an accepted offer. There's no "blank project" button, so
+every project has a client, price and acceptance on record. Tasks without a project are allowed.
+
+### D-33 A retainer month can't be created twice
+`RetainerRun` has one row per project and month, and only the first attempt to add it goes on to
+create work. The migration backfills rows for months that already have deliverables, so sample and
+existing data can't be doubled. Months before the retainer starts or after it ends are skipped.
+
+### D-34 The daily job
+`/api/cron/daily-work` creates retainer months once their day has come, renews auto-renew retainers
+and refreshes health. The dashboard and Projects pages also start it, at most once every 10 minutes,
+so figures stay right if the schedule is late. It runs after the page is sent, so nobody waits for it.
+Running it any number of times is safe.
+
+### D-35 Auto-renew only extends the dates
+A renewal adds the same length as the period that just ended. It sends and invoices nothing. Monthly
+draft invoices arrive in Phase 7.
+
+### D-36 Onboarding starts at acceptance
+The brief says the checklist is created "when an offer is accepted", so it doesn't wait for the
+project. It starts on the offer and moves to the project on conversion, keeping ticks. An offer still
+on a lead gets its checklist when the lead becomes a client. Changing the standard checklist affects
+future clients only.
+
+### D-37 Per-unit items
+A per-unit item gets one set of tasks per unit, for example 4 reels gives Reel #1 to #4, up to 100
+sets. A larger quantity still creates only 100, so bulk work like that should be split or managed by hand.
+
+### D-38 Task statuses move freely
+Real work goes back and forth, so any status can follow any other. Only Blocked needs a reason, which
+is why bulk changes can't set it. Every change is in the activity log. Reopening a task also
+un-delivers its deliverable.
+
+### D-39 "Waiting for client" isn't a delay
+Overdue tasks waiting for client approval don't count against project health, since the delay isn't
+the agency's. The Phase 6 reminders will chase them after 2 days. The other health rules are in
+`src/lib/health.ts`.
+
+### D-40 New team members choose their own password
+Adding a person emails them a single-use link that lasts 3 days. Only its hash is stored, and nobody
+ever sees or sets their password for them. An admin can't change their own role or deactivate
+themselves, and the last active admin can't be removed.
+
+### D-41 Attachments always download
+Task files are served through a permission check and always as downloads, never opened inside the
+app, so an uploaded file can't run in a logged-in session.

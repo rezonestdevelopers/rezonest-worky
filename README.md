@@ -3,7 +3,7 @@
 Internal agency management system for **Rezonest Digital & Services**, Bhosari, Pune.
 Leads → offers → projects → tasks → GST invoices → payments, all in one place.
 
-> Status: **Phase 3 done** (offers, PDF, email and WhatsApp sharing, client accept link, versions, templates).
+> Status: **Phase 4 done** (client onboarding, projects, milestones, targets, health, tasks with list, Kanban and calendar, change requests, team, monthly retainer tasks).
 > See [`docs/PROGRESS.md`](docs/PROGRESS.md) for what's built and what's next.
 
 ---
@@ -68,7 +68,7 @@ the terminal where `pnpm dev` runs (until email/SMTP is set up).
 | `SMTP_*` | Email sending (Google Workspace / Zoho). Empty `SMTP_HOST` = print emails to the console |
 | `STORAGE_DRIVER` | `local` (files in `./storage`) or `s3` (AWS S3 Mumbai / Cloudflare R2) |
 | `S3_*` | Bucket details when `STORAGE_DRIVER=s3` |
-| `CRON_SECRET` | Protects scheduled job URLs (used from Phase 6) |
+| `CRON_SECRET` | Protects the scheduled job URLs |
 
 ## 3. Useful commands
 
@@ -93,13 +93,14 @@ createdb -U rezonest rezonest_workos_test
 
 ### Scheduled jobs
 
-Call this once a day, with `CRON_SECRET` from `.env`:
+Call these once a day, with `CRON_SECRET` from `.env`:
 
 ```bash
 curl -H "Authorization: Bearer YOUR_CRON_SECRET" https://your-app/api/cron/expire-offers
+curl -H "Authorization: Bearer YOUR_CRON_SECRET" https://your-app/api/cron/daily-work
 ```
 
-On Vercel, add it under Cron Jobs. On a VPS, add it to cron. It moves offers past their validity to Expired, and running it twice is safe.
+On Vercel, add them under Cron Jobs. On a VPS, add them to cron. The first moves offers past their validity to Expired. The second creates each retainer's monthly deliverables and tasks once their day has come, renews retainers set to auto-renew, and refreshes project health. Running either twice is safe.
 
 **Keep `AUTH_SECRET` and `APP_URL` correct when going live.** Client offer links are built from them, so changing `AUTH_SECRET` later stops existing links working.
 
@@ -134,7 +135,7 @@ pg_restore --clean --no-owner --dbname "$DATABASE_URL" rezonest-2026-11-02.dump
 - **Change invoice / quotation number format?** Settings → *Numbering*. Use `{FY}` and `{SEQ}`.
   Numbers restart each 1 April and are never reused. Changes affect future documents only.
 - **Change the brand colour?** Settings → *Branding*, or edit `--brand` in `src/app/globals.css`.
-- **Add a new employee?** The Team screen arrives in Phase 4. For now, the sample employees show how it will look.
+- **Add a new employee?** Go to Team → Add person. Enter their name, email, department and access level. They get an email with a link to choose their own password; it lasts 3 days, and "Send password link" on their page sends a new one. To remove someone, open their page and choose Deactivate. Their history stays, and you decide who takes their open tasks.
 - **Bring in my existing clients or leads?** Clients (or Leads) → *Import* → *Download template*, fill it in, upload it.
   You see a preview with errors and possible duplicates first. Nothing is saved until you click Import.
 - **Change a service's price, GST rate, SAC code or task steps?** Settings → *Service catalogue*.

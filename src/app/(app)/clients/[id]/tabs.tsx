@@ -24,14 +24,14 @@ function TabTable({
   columns: string[];
   rows: { key: string; cells: React.ReactNode[] }[];
   empty: string;
-  phase: number;
+  phase?: number;
   section: string;
 }) {
   return (
     <Card className="gap-3">
       <CardContent className="space-y-3 px-0 sm:px-5">
         {rows.length === 0 ? (
-          <EmptyState title={empty} hint={`Adding ${section} from here arrives in Phase ${phase}.`} />
+          <EmptyState title={empty} hint={phase ? `Adding ${section} from here arrives in Phase ${phase}.` : undefined} />
         ) : (
           <>
             <Table>
@@ -49,7 +49,7 @@ function TabTable({
               </TableBody>
             </Table>
             <p className="px-5 text-xs text-muted-foreground sm:px-0">
-              Showing the latest {rows.length}. Managing {section} here arrives in Phase {phase}.
+              Showing the latest {rows.length}.{phase ? ` Managing ${section} here arrives in Phase ${phase}.` : ""}
             </p>
           </>
         )}
@@ -94,12 +94,12 @@ export async function ClientTab({ tab, clientId }: { tab: string; clientId: stri
       const rows = await clientTabQueries.projects(clientId);
       return (
         <TabTable
-          section="projects" phase={4} empty="No projects yet"
+          section="projects" empty="No projects yet"
           columns={["Code", "Project", "Status", "Health", "Progress", "Start", "Deadline / ends", "Manager"]}
           rows={rows.map((p) => ({
             key: p.id,
             cells: [
-              p.code, clip(p.name), <StatusBadge key="s" kind="project" value={p.status} />,
+              p.code, <Link key="n" href={`/projects/${p.id}`} className="block max-w-72 truncate font-medium hover:underline">{p.name}</Link>, <StatusBadge key="s" kind="project" value={p.status} />,
               <StatusBadge key="h" kind="health" value={effectiveHealth(p.healthAuto, p.healthOverride)} />,
               `${p.progressPercent}%`, formatDateKey(p.startDate), formatDateKey(p.deadline ?? p.retainerEnd), p.manager?.name ?? "—",
             ],
@@ -111,11 +111,11 @@ export async function ClientTab({ tab, clientId }: { tab: string; clientId: stri
       const rows = await clientTabQueries.tasks(clientId);
       return (
         <TabTable
-          section="tasks" phase={4} empty="No open tasks"
+          section="tasks" empty="No open tasks"
           columns={["Task", "Status", "Priority", "Due", "Assigned to"]}
           rows={rows.map((t) => ({
             key: t.id,
-            cells: [clip(t.title), <StatusBadge key="s" kind="task" value={t.status} />, <StatusBadge key="p" kind="priority" value={t.priority} />, formatDateKey(t.dueDate), t.assignee?.name ?? "—"],
+            cells: [<Link key="n" href={`/tasks/${t.id}`} className="block max-w-72 truncate font-medium hover:underline">{t.title}</Link>, <StatusBadge key="s" kind="task" value={t.status} />, <StatusBadge key="p" kind="priority" value={t.priority} />, formatDateKey(t.dueDate), t.assignee?.name ?? "—"],
           }))}
         />
       );
