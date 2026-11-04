@@ -230,3 +230,79 @@ themselves, and the last active admin can't be removed.
 ### D-41 Attachments always download
 Task files are served through a permission check and always as downloads, never opened inside the
 app, so an uploaded file can't run in a logged-in session.
+
+### D-42 What the client sees on the approval link
+The link shows one client's content for one month: date, format, platforms, topic, caption, creative
+and their own answers. Design status, tasks, team and prices never leave the server. It works for 30
+days, can be withdrawn at any time, and there's one working link per client and month. Tokens work as
+in D-22. An offer's link can't open a calendar, and a calendar's link can't open an offer.
+
+### D-43 Clients approve the calendar, not only finished designs
+The Social Media template has a "Client approval of calendar" step before design starts, so the page
+shows every item in the month, including those with no creative yet. Each is answered on its own, as
+the brief asks. There's no "approve all" button, because the brief doesn't ask for one.
+
+### D-44 What a client's answer changes
+Approving finishes that deliverable's client approval step. Asking for changes sends any task waiting
+on the client back to In Progress and counts one revision on the deliverable. Going past the included
+revisions tells you to consider a change request; nothing is billed by itself. Only the first of two
+answers given at the same moment counts.
+
+### D-45 Changing approved content sends it back
+If the topic, caption or creative of an approved item changes, it returns to Awaiting approval, so a
+client's approval always matches what goes out. Changing only the date, format or platforms doesn't.
+
+### D-46 Publishing needs approval, and counts as delivery
+Only approved content can be marked as published. If approval came by phone or WhatsApp, a manager
+records it with a note, and the history shows who recorded it. Publishing finishes that deliverable's
+open tasks, so "delivered" keeps one meaning across the calendar, project page and dashboard: all of
+its tasks are done. Undoing it doesn't reopen those tasks.
+
+### D-47 Creatives: images and PDFs are uploaded, videos are linked
+Images and PDFs go up to 5 MB. Reels and videos are shared as a Drive or YouTube link, because large
+video uploads need direct-to-storage uploading, which is better built with production storage in
+Phase 10. Images open on the page. Other files download. Either way they're served through a permission
+or token check, in a sandbox, and a replaced creative is archived rather than deleted.
+
+### D-48 Package items can't be archived
+A calendar item that came from a retainer's package is something you promised, so archiving it would
+quietly lower the committed count. It can be edited or moved instead. Extra items can be archived.
+
+### D-49 Ad results can't overlap
+Two entries for one campaign can't share a day, by hand or by upload, because counting a day twice
+overstates the client's spend. Uploading the same report twice therefore adds nothing. Future dates
+are refused. A removed entry leaves the totals but is kept, and the removal is in the activity log.
+
+### D-50 Reading Ads Manager reports
+Uploads match rows to campaigns by name, for the chosen client only, so names are unique per client.
+Only rupee spend columns are read, so a dollar account can't be mistaken for rupees. "Leads" is
+preferred, and "Results" is used only if there's no Leads column, with a warning, because Results can
+mean purchases. Dates are read day first. Nothing is saved before you confirm the preview.
+
+### D-51 Budget used is total spend against the campaign's budget
+The budget is the client's total for the campaign, matching the Phase 1 dashboard alert. It's their
+money and is never added to revenue. For a monthly budget, make one campaign per month.
+
+### D-52 Who sees what in Phase 5
+Ads are for Admin and Manager, with the client's budget visible but no fees. Renewals are Admin only,
+because they show your cost and margin. A Manager still sees a client's Renewals tab, with no prices.
+Employees see content for projects where they can see a task. They can update design status, add
+creatives and mark content published, but can't create items or send approval links.
+
+### D-53 Renewals only record what happened
+"Mark renewed" moves the expiry date and keeps the old one in the history; it doesn't contact the
+provider. The auto-renew switch is a note for you. "Create renewal invoice" is on the page, switched
+off until invoices exist in Phase 7. Text like "password: abc" is refused in the credentials and notes
+fields, so a slip doesn't end up stored. Writing "password manager" is fine.
+
+### D-54 A filter always takes effect, even if Next.js drops the page change
+On the content calendar, about 1 filter choice in 20 did nothing: the server's answer was complete and
+identical to a working one (compared byte for byte), but the browser never switched to it, with no error.
+Ruled out by measuring: fetching links ahead, nested data loading, and the transition around the
+page change. Tasks, Offers, Ads and Renewals lost none in hundreds of tries. The cause inside Next.js 15.5
+is still unknown (compare D-14 and D-16). So `ListToolbar` checks the address after 2 seconds, asks again,
+and after 2 more does a full page load, which always works because filters live in the address (D-17). It
+acts only if the address hasn't moved at all, so it can't undo a sort or page change made in the meantime.
+Worst case is a 4-second wait. Remove this if a later Next.js fixes it. The calendar's own links, such as the
+month arrows and cards, had the same problem, so they're plain links that load the whole page. That also
+stopped them fetching ahead, which removed about 70 requests from every page load.

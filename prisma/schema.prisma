@@ -1055,6 +1055,7 @@ model ContentCalendarItem {
   topic          String
   caption        String?
   creativeDocId  String?
+  creativeUrl    String?        // reels and videos are shared as a Drive or YouTube link
   designStatus   DesignStatus   @default(NOT_STARTED)
   approvalStatus ApprovalStatus @default(PENDING)
   publishDate    DateTime?      @db.Date
@@ -1129,6 +1130,7 @@ model AdSpendEntry {
   conversionValue Decimal @default(0) @db.Decimal(14, 2) // for ROAS
   source       String   @default("manual") // manual | csv
   createdAt    DateTime @default(now())
+  archivedAt   DateTime?
 
   campaign AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 

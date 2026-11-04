@@ -69,6 +69,22 @@ export const STATUS: Record<string, Record<string, StatusDef>> = {
     CANCELLED: { label: "Cancelled", tone: "grey" },
     NONE: { label: "No invoices", tone: "grey" },
   },
+  approval: {
+    PENDING: { label: "Awaiting approval", tone: "amber" },
+    APPROVED: { label: "Approved", tone: "green" },
+    CHANGES_REQUESTED: { label: "Changes requested", tone: "red" },
+  },
+  design: {
+    NOT_STARTED: { label: "Not started", tone: "grey" },
+    IN_PROGRESS: { label: "In progress", tone: "blue" },
+    READY: { label: "Ready", tone: "green" },
+  },
+  campaign: {
+    PLANNED: { label: "Planned", tone: "grey" },
+    ACTIVE: { label: "Active", tone: "blue" },
+    PAUSED: { label: "Paused", tone: "amber" },
+    COMPLETED: { label: "Completed", tone: "green" },
+  },
   severity: {
     INFO: { label: "Info", tone: "blue" },
     WARNING: { label: "Warning", tone: "amber" },

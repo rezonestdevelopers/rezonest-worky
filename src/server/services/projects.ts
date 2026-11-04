@@ -89,7 +89,10 @@ export async function generateRetainerMonth(tx: Tx, projectId: string, month: st
       for (const [i, dueKey] of dates.entries()) {
         const title = `${labelForFormat(format)} #${i + 1} – ${monthName}`;
         const deliverable = await tx.deliverable.create({
-          data: { projectId, serviceId: ps.serviceId, format, title, month, dueDate: keyToDate(dueKey), revisionsIncluded: ps.service.revisionsIncluded },
+          data: {
+            projectId, serviceId: ps.serviceId, format, title, month, dueDate: keyToDate(dueKey), revisionsIncluded: ps.service.revisionsIncluded,
+            contentItem: { create: { clientId: project.clientId, projectId, format, topic: title, publishDate: keyToDate(dueKey), month } },
+          },
         });
         const rows = taskRows(planBackward(steps, dueKey, from, workingDays), { projectId, clientId: project.clientId, serviceId: ps.serviceId, deliverableId: deliverable.id, prefix: title, actorId });
         await tx.task.createMany({ data: rows });

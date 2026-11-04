@@ -100,7 +100,7 @@ export async function getAlerts(scope: Scope, opts: { money: boolean; settings: 
     }),
     db.adCampaign.findMany({
       where: { archivedAt: null, status: "ACTIVE", client: scope.clientWhere },
-      select: { id: true, name: true, plannedBudget: true, client: { select: { companyName: true } }, entries: { select: { spend: true } } },
+      select: { id: true, name: true, plannedBudget: true, client: { select: { companyName: true } }, entries: { where: { archivedAt: null }, select: { spend: true } } },
     }),
     db.project.findMany({
       where: { ...scope.projectWhere, status: "ACTIVE", isRetainer: true, retainerEnd: { gte: today, lte: keyToDate(addDaysKey(T, s.retainerEndingDays)) } },
@@ -192,7 +192,7 @@ export async function getAlerts(scope: Scope, opts: { money: boolean; settings: 
       key: `RENEWAL_DUE:${a.id}:${exp}:${days < 0 ? "expired" : threshold}`, type: "RENEWAL_DUE", category: "renewal",
       severity: days <= 7 ? "CRITICAL" : days <= 15 ? "WARNING" : "INFO",
       title: `${kind} ${days < 0 ? "expired" : days === 0 ? "expires today" : `expires in ${days} day${days === 1 ? "" : "s"}`}: ${a.name}`,
-      detail: `${a.client.companyName} · ${formatDateKey(exp)}`, href: "/renewals", entityType: "DomainHostingAsset", entityId: a.id, dateKey: exp,
+      detail: `${a.client.companyName} · ${formatDateKey(exp)}`, href: `/renewals/${a.id}`, entityType: "DomainHostingAsset", entityId: a.id, dateKey: exp,
     });
   }
   for (const c of campaigns) {
@@ -204,7 +204,7 @@ export async function getAlerts(scope: Scope, opts: { money: boolean; settings: 
       alerts.push({
         key: `AD_BUDGET_ALERT:${c.id}`, type: "AD_BUDGET_ALERT", category: "ads", severity: pct >= 100 ? "CRITICAL" : "WARNING",
         title: `${c.client.companyName}: ${Math.round(pct)}% of ad budget used`, detail: `${c.name} · ${formatINR(spent, { decimals: false })} of ${formatINR(budget, { decimals: false })} (client's budget)`,
-        href: "/ads", entityType: "AdCampaign", entityId: c.id,
+        href: `/ads/${c.id}`, entityType: "AdCampaign", entityId: c.id,
       });
     }
   }

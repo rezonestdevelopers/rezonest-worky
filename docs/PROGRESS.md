@@ -169,4 +169,37 @@ See `docs/DECISIONS.md` → D-09.
   show to Managers, but the rupee amounts don't.
 - Client "Change request → invoice" arrives in Phase 7, and auto-renew doesn't bill anything yet (D-35).
 
-## Phase 5: Content calendar, Meta Ads, Domain & Hosting ⏳ (not started)
+## Phase 5: Content calendar, Meta Ads, Domain & Hosting ✅ (04 Nov 2026)
+
+### Done
+- **Content calendar**: month view and list, with filters, sorting, paging and Excel. Add items by
+  hand, and each retainer month adds its package items by itself. Platforms, format, topic, caption,
+  creative, design status, approval status, publish date and live link.
+- **Client approval link**: no login, one client and one month only. Approve or request changes on
+  each item, with name, time and IP recorded. Share by copying, WhatsApp or email. Works for 30 days,
+  and can be withdrawn. The team is told in the app about each answer.
+- **Linked to the work**: approval finishes the approval step, changes send waiting work back and
+  count a revision, and publishing needs approval and finishes the deliverable's tasks.
+- **Committed vs delivered** per client and month, such as 8/12 posts and 5/8 reels.
+- **Meta Ads**: campaigns with the client's budget, kept apart from your revenue. Daily or weekly
+  results by hand, with CTR, CPL, ROAS and budget used worked out. Colours at the alert level and at 100%.
+- **Ads Manager reports**: upload CSV or Excel, check the preview, confirm. Uploading twice adds nothing.
+- **Renewals**: all domains, hosting, SSL and business email, nearest expiry first and colour coded,
+  with filters, cost, price, margin, Excel and renewal history. Passwords are refused.
+- **Client tabs** for Content, Ads and Renewals now open these pages, as do the dashboard's alerts.
+- **Tests**: 380 unit + integration tests (61 new), 44 end-to-end browser tests (6 new). All passing.
+
+### Known issues / limitations
+- Reels and videos are shared as links rather than uploaded (D-47).
+- "Create renewal invoice" is switched off until Phase 7. Automatic draft renewal invoices also come then.
+- Client answers notify you in the app only. Email alerts and the digest come in Phase 6.
+- The approval link email goes to the server console until SMTP is set.
+- Items from a retainer package start with the deliverable's name as the topic and no platforms. The
+  item page reminds you to fill them in before the client sees them.
+- Sorting the campaign list by spend or CPL isn't available, because those are worked out from entries.
+- Meta's own API isn't connected; the brief leaves that as an optional later phase.
+- On the content calendar, about 1 filter choice in 20 needs the automatic retry, so it can take up to 4
+  seconds (D-54). The cause inside Next.js is unknown. Sorting and paging on the content list aren't covered
+  by the retry; they lost none in testing, and a second click would work.
+
+## Phase 6: Reminder engine, notifications, digests, email templates ⏳ (not started)

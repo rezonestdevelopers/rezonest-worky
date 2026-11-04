@@ -624,7 +624,7 @@ export async function seedSampleData(db: PrismaClient, adminId: string) {
               await db.deliverable.update({ where: { id: deliverable.id }, data: { deliveredAt: at(st.completedKey!, 18), revisionsUsed: randInt(0, 2) } });
             }
             const approved = st.status === "DONE" || (st.status === "IN_REVIEW" && rand() < 0.5);
-            await db.contentCalendarItem.create({
+            const contentItem = await db.contentCalendarItem.create({
               data: {
                 clientId: client[p.client].id,
                 projectId: pr.id,
@@ -641,6 +641,11 @@ export async function seedSampleData(db: PrismaClient, adminId: string) {
                 month,
               },
             });
+            if (contentItem.approvalStatus === "CHANGES_REQUESTED") {
+              await db.contentApproval.create({ data: { itemId: contentItem.id, decision: "CHANGES_REQUESTED", byName: "Client", comment: "Please use our new product photo and shorten the caption." } });
+            } else if (contentItem.approvalStatus === "APPROVED") {
+              await db.contentApproval.create({ data: { itemId: contentItem.id, decision: "APPROVED", byName: "Client" } });
+            }
           }
         }
         // recurring service tasks

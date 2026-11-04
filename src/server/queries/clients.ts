@@ -202,7 +202,7 @@ export const clientTabQueries = {
       where: { clientId, archivedAt: null },
       orderBy: { startDate: "desc" },
       take: TAKE,
-      select: { id: true, name: true, objective: true, status: true, startDate: true, endDate: true, plannedBudget: true, entries: { select: { spend: true, leads: true } } },
+      select: { id: true, name: true, objective: true, status: true, startDate: true, endDate: true, plannedBudget: true, entries: { where: { archivedAt: null }, select: { spend: true, leads: true } } },
     }),
   renewals: (clientId: string) =>
     db.domainHostingAsset.findMany({

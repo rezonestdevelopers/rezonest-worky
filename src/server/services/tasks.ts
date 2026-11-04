@@ -102,7 +102,7 @@ export async function updateTask(db: Db, id: string, input: TaskData, actorId: s
   });
 }
 
-async function applyStatus(tx: Tx, task: Prisma.TaskGetPayload<object>, status: TaskStatus, blockedReason: string | null, actorId: string) {
+async function applyStatus(tx: Tx, task: Prisma.TaskGetPayload<object>, status: TaskStatus, blockedReason: string | null, actorId: string | null) {
   await tx.task.update({
     where: { id: task.id },
     data: {
@@ -115,6 +115,23 @@ async function applyStatus(tx: Tx, task: Prisma.TaskGetPayload<object>, status: 
   await syncDeliverable(tx, task.deliverableId);
   if (task.projectId) await refreshProject(tx, task.projectId);
   await logActivity(tx, { actorId, action: "task.status_changed", entityType: "Task", entityId: task.id, clientId: task.clientId, changes: { status: { from: task.status, to: status }, ...(blockedReason ? { reason: blockedReason } : {}) } });
+}
+
+/** The client answered: approval steps finish, and work that was waiting on them goes back to the team. */
+export async function applyClientDecision(tx: Tx, deliverableId: string, approved: boolean, actorId: string | null) {
+  const tasks = await tx.task.findMany({ where: { deliverableId, archivedAt: null, status: { not: "DONE" } } });
+  for (const t of tasks) {
+    const waiting = t.status === "WAITING_CLIENT_APPROVAL";
+    if (approved && (waiting || /client approval/i.test(t.title))) await applyStatus(tx, t, "DONE", null, actorId);
+    else if (!approved && waiting) await applyStatus(tx, t, "IN_PROGRESS", null, actorId);
+  }
+}
+
+/** It's been published, so whatever was still open on that deliverable is finished. Returns how many tasks were closed. */
+export async function completeDeliverableTasks(tx: Tx, deliverableId: string, actorId: string | null): Promise<number> {
+  const tasks = await tx.task.findMany({ where: { deliverableId, archivedAt: null, status: { not: "DONE" } } });
+  for (const t of tasks) await applyStatus(tx, t, "DONE", null, actorId);
+  return tasks.length;
 }
 
 export async function changeTaskStatus(db: Db, input: { taskId: string; status: TaskStatus; blockedReason?: string | null; viewer: Viewer }) {

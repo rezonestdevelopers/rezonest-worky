@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 const Select = P.Root;
 const SelectGroup = P.Group;
-const SelectValue = P.Value;
+const SelectValue = (props: React.ComponentProps<typeof P.Value>) => <P.Value data-slot="select-value" {...props} />;
 
 function SelectTrigger({ className, children, size = "default", ...props }: React.ComponentProps<typeof P.Trigger> & { size?: "sm" | "default" }) {
   return (

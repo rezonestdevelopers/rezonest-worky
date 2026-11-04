@@ -115,6 +115,7 @@ beforeAll(async () => {
 beforeEach(async () => {
   await db.notification.deleteMany();
   await db.passwordResetToken.deleteMany();
+  await db.contentCalendarItem.deleteMany();
   await db.changeRequest.deleteMany();
   await db.timeLog.deleteMany();
   await db.task.deleteMany();

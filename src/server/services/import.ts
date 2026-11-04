@@ -34,7 +34,7 @@ export function cellToText(value: unknown): string {
 }
 
 /** Reads the first sheet of an .xlsx file, or a .csv file, into rows of text. */
-async function readTable(buffer: Buffer, fileName: string): Promise<{ number: number; cells: string[] }[]> {
+export async function readTable(buffer: Buffer, fileName: string): Promise<{ number: number; cells: string[] }[]> {
   const lower = fileName.toLowerCase();
   if (lower.endsWith(".csv")) {
     if (buffer.includes(0)) throw new BusinessError("This doesn't look like a CSV file.");

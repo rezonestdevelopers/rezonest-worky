@@ -75,7 +75,7 @@ function describeChanges(changes: unknown): string {
     .join("; ");
 }
 
-export async function ClientTab({ tab, clientId }: { tab: string; clientId: string }) {
+export async function ClientTab({ tab, clientId, showMoney }: { tab: string; clientId: string; showMoney: boolean }) {
   switch (tab) {
     case "offers": {
       const rows = await clientTabQueries.offers(clientId);
@@ -124,11 +124,11 @@ export async function ClientTab({ tab, clientId }: { tab: string; clientId: stri
       const rows = await clientTabQueries.content(clientId);
       return (
         <TabTable
-          section="the content calendar" phase={5} empty="No content planned"
+          section="the content calendar" empty="No content planned"
           columns={["Topic", "Format", "Platforms", "Design", "Approval", "Publish date"]}
           rows={rows.map((c) => ({
             key: c.id,
-            cells: [clip(c.topic), humanize(c.format), c.platforms.map(humanize).join(", "), humanize(c.designStatus), humanize(c.approvalStatus), formatDateKey(c.publishDate)],
+            cells: [<Link key="n" href={`/content/${c.id}`} className="block max-w-72 truncate font-medium hover:underline">{c.topic}</Link>, humanize(c.format), c.platforms.map(humanize).join(", ") || "—", <StatusBadge key="d" kind="design" value={c.designStatus} />, <StatusBadge key="a" kind="approval" value={c.approvalStatus} />, formatDateKey(c.publishDate)],
           }))}
         />
       );
@@ -137,12 +137,12 @@ export async function ClientTab({ tab, clientId }: { tab: string; clientId: stri
       const rows = await clientTabQueries.ads(clientId);
       return (
         <TabTable
-          section="ad campaigns" phase={5} empty="No ad campaigns"
+          section="ad campaigns" empty="No ad campaigns"
           columns={["Campaign", "Objective", "Status", "Start", "End", "Client's budget", "Spent", "Leads"]}
           rows={rows.map((c) => ({
             key: c.id,
             cells: [
-              clip(c.name), c.objective ?? "—", humanize(c.status), formatDateKey(c.startDate), formatDateKey(c.endDate), amount(c.plannedBudget),
+              <Link key="n" href={`/ads/${c.id}`} className="block max-w-72 truncate font-medium hover:underline">{c.name}</Link>, c.objective ?? "—", <StatusBadge key="s" kind="campaign" value={c.status} />, formatDateKey(c.startDate), formatDateKey(c.endDate), amount(c.plannedBudget),
               amount(sum(c.entries.map((e) => e.spend))), c.entries.reduce((n, e) => n + e.leads, 0),
             ],
           }))}
@@ -153,11 +153,11 @@ export async function ClientTab({ tab, clientId }: { tab: string; clientId: stri
       const rows = await clientTabQueries.renewals(clientId);
       return (
         <TabTable
-          section="renewals" phase={5} empty="No domains or hosting"
+          section="renewals" empty="No domains or hosting"
           columns={["Item", "Type", "Provider", "Expires", "Auto-renew", "Credentials kept in"]}
           rows={rows.map((a) => ({
             key: a.id,
-            cells: [clip(a.name), humanize(a.kind), a.provider ?? "—", formatDateKey(dateOnlyKey(a.expiryDate)), a.autoRenew ? "Yes" : "No", clip(a.credentialsLocation ?? "—", "max-w-56")],
+            cells: [showMoney ? <Link key="n" href={`/renewals/${a.id}`} className="block max-w-72 truncate font-medium hover:underline">{a.name}</Link> : clip(a.name), humanize(a.kind), a.provider ?? "—", formatDateKey(dateOnlyKey(a.expiryDate)), a.autoRenew ? "Yes" : "No", clip(a.credentialsLocation ?? "—", "max-w-56")],
           }))}
         />
       );

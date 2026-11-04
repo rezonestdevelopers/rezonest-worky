@@ -19,10 +19,24 @@ export function ListToolbar({ placeholder, filters, exportHref, keep = [] }: { p
   const [, startTransition] = useTransition();
   const [q, setQ] = useState(sp.get("q") ?? "");
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const retry = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Every change goes through here, so "Clear" takes the same route as a search or filter.
-  const navigate = (params: URLSearchParams) =>
-    startTransition(() => router.replace(`${pathname}?${params.toString()}`, { scroll: false }));
+  const navigate = (params: URLSearchParams, firstTry = true) => {
+    const target = params.toString();
+    const url = `${pathname}?${target}`;
+    const before = window.location.search;
+    clearTimeout(retry.current);
+    startTransition(() => router.replace(url, { scroll: false }));
+    // Next.js occasionally drops a page change on busy pages, with no error (D-54). So: ask again, then load the page.
+    // Only if the address hasn't moved at all: any change means it worked, or you've since sorted or changed page.
+    if (new URLSearchParams(before).toString() === target) return;
+    retry.current = setTimeout(() => {
+      if (window.location.search !== before) return;
+      if (firstTry) navigate(params, false);
+      else window.location.assign(url);
+    }, 2000);
+  };
 
   const apply = (changes: Record<string, string | null>) => {
     const next = new URLSearchParams(sp.toString());
@@ -34,7 +48,13 @@ export function ListToolbar({ placeholder, filters, exportHref, keep = [] }: { p
     navigate(next);
   };
 
-  useEffect(() => () => clearTimeout(timer.current), []);
+  useEffect(
+    () => () => {
+      clearTimeout(timer.current);
+      clearTimeout(retry.current);
+    },
+    [],
+  );
 
   const onSearch = (value: string) => {
     setQ(value);
@@ -53,7 +73,7 @@ export function ListToolbar({ placeholder, filters, exportHref, keep = [] }: { p
       <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
         {filters.map((f) => (
           <Select key={f.key} value={sp.get(f.key) ?? ALL} onValueChange={(v) => apply({ [f.key]: v })}>
-            <SelectTrigger size="sm" className="w-full min-w-0 sm:w-auto sm:max-w-48" aria-label={f.label}>
+            <SelectTrigger size="sm" className="w-full min-w-0 sm:w-auto sm:max-w-48 *:data-[slot=select-value]:min-w-0 *:data-[slot=select-value]:text-left" aria-label={f.label}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

@@ -120,7 +120,7 @@ export default async function ClientDetailPage({ params, searchParams }: { param
             details={client}
           />
         ) : (
-          <ClientTab tab={tab} clientId={id} />
+          <ClientTab tab={tab} clientId={id} showMoney={showMoney} />
         )}
       </Suspense>
     </div>
