@@ -2,10 +2,12 @@
 
 import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import type { TaskStatus } from "@prisma/client";
 import { invalid, type ActionResult } from "@/lib/action-result";
 import { db } from "@/lib/db";
-import { fillTemplate, sendMail } from "@/lib/mailer";
+import { renderTemplate } from "@/lib/email-templates";
+import { sendMail } from "@/lib/mailer";
 import { putFile, sniffImage } from "@/lib/storage";
 import {
   bulkTaskSchema,
@@ -33,6 +35,8 @@ import {
   type TimeLogInput,
 } from "@/lib/validators/work";
 import { runAction } from "@/server/action-guard";
+import { sendWaitingNotificationEmails } from "@/server/reminder-jobs";
+import { getTemplate } from "@/server/services/email-templates";
 import { addOnboardingItem, removeOnboardingItem, saveOnboardingTemplate, setOnboardingItemDone } from "@/server/services/onboarding";
 import {
   convertOfferToProject,
@@ -206,6 +210,7 @@ export async function saveTaskAction(id: string | null, input: TaskInput): Promi
     const parsed = taskSchema.safeParse(input);
     if (!parsed.success) return invalid(parsed.error);
     const task = id ? await updateTask(db, id, parsed.data, user.id) : await createTask(db, parsed.data, user.id);
+    after(sendWaitingNotificationEmails);
     refreshWork(task.projectId, task.id);
     return { ok: true, id: task.id, message: id ? "Task saved." : "Task created." };
   });
@@ -227,6 +232,7 @@ export async function bulkUpdateTasksAction(input: { taskIds: string[]; assignee
     const parsed = bulkTaskSchema.safeParse(input);
     if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
     const count = await bulkUpdateTasks(db, { taskIds: parsed.data.taskIds, assigneeId: parsed.data.assigneeId, status: parsed.data.status as TaskStatus | undefined }, user.id);
+    after(sendWaitingNotificationEmails);
     refreshWork();
     revalidatePath("/projects", "layout");
     return { ok: true, message: `Updated ${count} task${count === 1 ? "" : "s"}.` };
@@ -238,6 +244,7 @@ export async function addCommentAction(input: { taskId: string; body: string }):
     const parsed = commentSchema.safeParse(input);
     if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
     await addComment(db, { ...parsed.data, viewer: await loadViewer(db, user) });
+    after(sendWaitingNotificationEmails);
     revalidatePath(`/tasks/${parsed.data.taskId}`);
     return { ok: true };
   });
@@ -322,12 +329,8 @@ export async function uploadTaskFileAction(formData: FormData): Promise<ActionRe
 
 async function sendWelcome(to: string, name: string, token: string, subjectAgency: string) {
   const link = `${process.env.APP_URL ?? "http://localhost:3000"}/reset-password?token=${token}`;
-  return sendMail({
-    to,
-    subject: `Welcome to ${subjectAgency} Work OS`,
-    text: fillTemplate("Hello {{name}},\n\nAn account has been created for you. Choose your password here. The link works for 3 days and only once:\n\n{{link}}\n\nThen sign in with this email address.", { name, link }),
-    entityType: "User",
-  });
+  const message = renderTemplate(await getTemplate(db, "team_invite"), { name, link, agencyName: subjectAgency });
+  return sendMail({ to, subject: message.subject, text: message.text, templateKey: "team_invite", entityType: "User" });
 }
 
 export async function createEmployeeAction(input: EmployeeInput): Promise<ActionResult> {

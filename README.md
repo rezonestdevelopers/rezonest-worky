@@ -3,7 +3,7 @@
 Internal agency management system for **Rezonest Digital & Services**, Bhosari, Pune.
 Leads → offers → projects → tasks → GST invoices → payments, all in one place.
 
-> Status: **Phase 5 done** (content calendar with client approval link, Meta Ads tracking and report upload, domain and hosting renewals).
+> Status: **Phase 6 done** (reminder engine, notification bell, daily email digests, editable email templates).
 > See [`docs/PROGRESS.md`](docs/PROGRESS.md) for what's built and what's next.
 
 ---
@@ -100,7 +100,13 @@ curl -H "Authorization: Bearer YOUR_CRON_SECRET" https://your-app/api/cron/expir
 curl -H "Authorization: Bearer YOUR_CRON_SECRET" https://your-app/api/cron/daily-work
 ```
 
-On Vercel, add them under Cron Jobs. On a VPS, add them to cron. The first moves offers past their validity to Expired. The second creates each retainer's monthly deliverables and tasks once their day has come, renews retainers set to auto-renew, and refreshes project health. Running either twice is safe.
+Call this one every hour:
+
+```bash
+curl -H "Authorization: Bearer YOUR_CRON_SECRET" https://your-app/api/cron/reminders
+```
+
+On Vercel, add them under Cron Jobs. On a VPS, add them to cron. The first moves offers past their validity to Expired. The second creates each retainer's monthly deliverables and tasks once their day has come, renews retainers set to auto-renew, and refreshes project health. The hourly one updates reminders, then sends the daily digest on its first run after the digest time set in Settings. Running any of them twice is safe, and a digest goes only once a day.
 
 **Keep `AUTH_SECRET` and `APP_URL` correct when going live.** Client offer links are built from them, so changing `AUTH_SECRET` later stops existing links working.
 

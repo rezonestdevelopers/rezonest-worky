@@ -53,8 +53,18 @@ export function EmployeeForm({ id, defaults, departments }: { id: string | null;
           <SelectField form={form} name="role" label="Access" required options={ROLE_OPTIONS} className="sm:col-span-2" />
           <TextField form={form} name="hourlyCost" label="Hourly cost (₹)" inputMode="decimal" hint="For profit figures. Only admins see this." />
           <div className="flex items-center justify-between gap-3 self-start rounded-lg border p-3">
-            <Label htmlFor="dailyDigest">Daily task email</Label>
+            <div>
+              <Label htmlFor="dailyDigest">Daily task email</Label>
+              <p className="text-xs text-muted-foreground">Their tasks due and overdue, each morning.</p>
+            </div>
             <Controller control={form.control} name="dailyDigest" render={({ field }) => <Switch id="dailyDigest" checked={field.value} onCheckedChange={field.onChange} />} />
+          </div>
+          <div className="flex items-center justify-between gap-3 self-start rounded-lg border p-3">
+            <div>
+              <Label htmlFor="emailOnTask">Email when assigned or mentioned</Label>
+              <p className="text-xs text-muted-foreground">They always get it in the app too.</p>
+            </div>
+            <Controller control={form.control} name="emailOnTask" render={({ field }) => <Switch id="emailOnTask" checked={field.value} onCheckedChange={field.onChange} />} />
           </div>
         </CardContent>
       </Card>

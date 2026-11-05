@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/settings", label: "Agency & rules", exact: true },
   { href: "/settings/services", label: "Service catalogue" },
   { href: "/settings/lists", label: "Sectors, sources & departments" },
+  { href: "/settings/emails", label: "Email templates" },
 ];
 
 export function SettingsNav() {

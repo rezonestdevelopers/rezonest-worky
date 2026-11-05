@@ -1,67 +1,57 @@
 "use server";
 
-import type { ReminderType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { db } from "@/lib/db";
 import { assertPermission, ForbiddenError } from "@/lib/auth-guard";
+import { db } from "@/lib/db";
+import { restoreSnoozed, setReminderState } from "@/server/services/reminders";
+import { BusinessError } from "@/server/services/shared";
+import { loadViewer } from "@/server/services/tasks";
+
+const REMINDER_TYPES = [
+  "TASK_DUE_TODAY", "TASK_DUE_SOON", "TASK_OVERDUE", "WAITING_APPROVAL", "MILESTONE_DUE", "PROJECT_DEADLINE", "ONBOARDING_PENDING", "LEAD_FOLLOW_UP", "OFFER_FOLLOW_UP",
+  "OFFER_EXPIRING", "INVOICE_DUE", "PAYMENT_OVERDUE", "RENEWAL_DUE", "RETAINER_ENDING", "AD_BUDGET_ALERT", "DELIVERY_SHORTFALL", "COMMUNICATION_NEXT_ACTION",
+] as const;
 
 const schema = z.object({
   key: z.string().min(3).max(300),
-  type: z.string().max(40),
+  type: z.enum(REMINDER_TYPES),
   title: z.string().max(300),
   entityType: z.string().max(40),
-  entityId: z.string().max(40),
+  entityId: z.string().max(60),
   href: z.string().max(300).optional(),
-  action: z.enum(["snooze", "done"]),
+  action: z.enum(["snooze", "done", "reopen"]),
   days: z.number().int().min(1).max(90).optional(),
 });
 
-export type AlertActionInput = z.infer<typeof schema>;
+export type AlertActionInput = z.input<typeof schema>;
 
-/** Snooze (1 / 3 / custom days) or mark an alert done. Stored in Reminder by dedupe key. */
+function refresh() {
+  revalidatePath("/dashboard");
+  revalidatePath("/notifications");
+  revalidatePath("/", "layout");
+}
+
+/** Snooze (1 day, 3 days or custom), mark done, or reopen. */
 export async function updateAlertAction(input: AlertActionInput): Promise<{ ok: boolean; error?: string }> {
   try {
     const user = await assertPermission("work.own");
-    const data = schema.parse(input);
-    const snoozedUntil = data.action === "snooze" ? new Date(Date.now() + (data.days ?? 1) * 86_400_000) : null;
-    await db.reminder.upsert({
-      where: { dedupeKey: data.key },
-      create: {
-        dedupeKey: data.key,
-        type: data.type as ReminderType,
-        title: data.title,
-        href: data.href,
-        entityType: data.entityType,
-        entityId: data.entityId,
-        assigneeId: user.role === "ADMIN" ? null : user.id,
-        status: data.action === "done" ? "DONE" : "SNOOZED",
-        snoozedUntil,
-        resolvedAt: data.action === "done" ? new Date() : null,
-      },
-      update: {
-        status: data.action === "done" ? "DONE" : "SNOOZED",
-        snoozedUntil,
-        resolvedAt: data.action === "done" ? new Date() : null,
-      },
-    });
-    await db.activityLog.create({
-      data: { actorId: user.id, action: `alert.${data.action}`, entityType: data.entityType, entityId: data.entityId, changes: { key: data.key, days: data.days ?? null } },
-    });
-    revalidatePath("/dashboard");
+    const parsed = schema.safeParse(input);
+    if (!parsed.success) return { ok: false, error: "Invalid request." };
+    await setReminderState(db, parsed.data, await loadViewer(db, user));
+    refresh();
     return { ok: true };
   } catch (e) {
-    if (e instanceof ForbiddenError) return { ok: false, error: e.message };
-    if (e instanceof z.ZodError) return { ok: false, error: "Invalid request." };
+    if (e instanceof ForbiddenError || e instanceof BusinessError) return { ok: false, error: e.message };
     console.error(e);
-    return { ok: false, error: "Could not update the alert. Please try again." };
+    return { ok: false, error: "Could not update the reminder. Please try again." };
   }
 }
 
-/** Bring back all snoozed alerts (handy if something was snoozed by mistake). */
+/** Brings back snoozed reminders, for anything snoozed by mistake. */
 export async function restoreSnoozedAction(): Promise<{ ok: boolean }> {
-  await assertPermission("work.own");
-  await db.reminder.updateMany({ where: { status: "SNOOZED" }, data: { status: "OPEN", snoozedUntil: null } });
-  revalidatePath("/dashboard");
+  const user = await assertPermission("work.own");
+  await restoreSnoozed(db, await loadViewer(db, user));
+  refresh();
   return { ok: true };
 }

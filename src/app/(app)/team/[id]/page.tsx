@@ -33,7 +33,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
         departments={departments.map((d) => ({ value: d.id, label: d.name }))}
         defaults={{
           name: user.name, email: user.email, role: user.role, phone: e?.phone ?? "", departmentId: e?.departmentId ?? "", designation: e?.designation ?? "",
-          joiningDate: e?.joiningDate ? dateOnlyKey(e.joiningDate) : "", hourlyCost: e?.hourlyCost?.toString() ?? "", dailyDigest: e?.dailyDigest ?? false,
+          joiningDate: e?.joiningDate ? dateOnlyKey(e.joiningDate) : "", hourlyCost: e?.hourlyCost?.toString() ?? "", dailyDigest: e?.dailyDigest ?? false, emailOnTask: e?.emailOnTask ?? false,
         }}
       />
     </div>

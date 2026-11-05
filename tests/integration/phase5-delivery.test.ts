@@ -150,8 +150,8 @@ describe("content calendar", () => {
 
   it("employees only reach content for projects where they can see a task", async () => {
     const r = await retainer();
-    const inDept = await createEmployee(db, employeeSchema.parse({ name: "Dept", email: "a@example.com", role: "EMPLOYEE", phone: "", departmentId: design, designation: "", joiningDate: "", hourlyCost: "", dailyDigest: false }), admin.id);
-    const outsider = await createEmployee(db, employeeSchema.parse({ name: "Out", email: "b@example.com", role: "EMPLOYEE", phone: "", departmentId: "", designation: "", joiningDate: "", hourlyCost: "", dailyDigest: false }), admin.id);
+    const inDept = await createEmployee(db, employeeSchema.parse({ name: "Dept", email: "a@example.com", role: "EMPLOYEE", phone: "", departmentId: design, designation: "", joiningDate: "", hourlyCost: "", dailyDigest: false, emailOnTask: false }), admin.id);
+    const outsider = await createEmployee(db, employeeSchema.parse({ name: "Out", email: "b@example.com", role: "EMPLOYEE", phone: "", departmentId: "", designation: "", joiningDate: "", hourlyCost: "", dailyDigest: false, emailOnTask: false }), admin.id);
     const i = await db.contentCalendarItem.findFirstOrThrow({ where: { projectId: r.projectId } });
     await setDesignStatus(db, { itemId: i.id, designStatus: "READY", viewer: { id: inDept.user.id, role: "EMPLOYEE", departmentId: design } });
     expect((await db.contentCalendarItem.findUniqueOrThrow({ where: { id: i.id } })).designStatus).toBe("READY");

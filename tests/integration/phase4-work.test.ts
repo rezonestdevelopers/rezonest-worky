@@ -38,7 +38,7 @@ let contentService: string;
 let webService: string;
 
 const employee = (over: Record<string, unknown>) =>
-  employeeSchema.parse({ name: "Team Person", email: "person@example.com", role: "EMPLOYEE", phone: "", departmentId: "", designation: "", joiningDate: "", hourlyCost: "", dailyDigest: false, ...over });
+  employeeSchema.parse({ name: "Team Person", email: "person@example.com", role: "EMPLOYEE", phone: "", departmentId: "", designation: "", joiningDate: "", hourlyCost: "", dailyDigest: false, emailOnTask: false, ...over });
 
 const retainerItem = (over: Record<string, unknown> = {}) => ({ serviceId: retainerService, description: "Social retainer", billingType: "MONTHLY_RETAINER", quantity: "1", unit: "month", rate: "20000", gstRate: "18", ...over });
 const webItem = (over: Record<string, unknown> = {}) => ({ serviceId: webService, description: "Website", billingType: "MILESTONE", quantity: "1", unit: "project", rate: "100000", gstRate: "18", ...over });

@@ -25,9 +25,13 @@ async function visibleTask(tx: Db | Tx, taskId: string, viewer: Viewer) {
   return task;
 }
 
-async function notify(tx: Tx, userIds: (string | null | undefined)[], actorId: string, input: { title: string; body?: string; href: string }) {
+/** `email` marks it for sending too, to people who've chosen email for tasks. The email goes after the save succeeds. */
+async function notify(tx: Tx, userIds: (string | null | undefined)[], actorId: string, input: { title: string; body?: string; href: string; email?: boolean }) {
   const targets = Array.from(new Set(userIds.filter((u): u is string => !!u && u !== actorId)));
-  if (targets.length) await tx.notification.createMany({ data: targets.map((userId) => ({ userId, ...input })) });
+  if (!targets.length) return;
+  const { email, ...content } = input;
+  const wanting = email ? await tx.employeeProfile.findMany({ where: { userId: { in: targets }, emailOnTask: true }, select: { userId: true } }) : [];
+  await tx.notification.createMany({ data: targets.map((userId) => ({ userId, ...content, wantsEmail: wanting.some((w) => w.userId === userId) })) });
 }
 
 /** A deliverable is delivered once all of its tasks are done, and un-delivered if one reopens. */
@@ -78,7 +82,7 @@ export async function createTask(db: Db, input: TaskData, actorId: string) {
     const data = await withProjectClient(tx, input);
     await assertAssignable(tx, data.assigneeId);
     const task = await tx.task.create({ data: { ...columns(data), createdById: actorId } });
-    await notify(tx, [data.assigneeId], actorId, { title: "New task for you", body: task.title, href: `/tasks/${task.id}` });
+    await notify(tx, [data.assigneeId], actorId, { title: "New task for you", body: task.title, href: `/tasks/${task.id}`, email: true });
     if (task.projectId) await refreshProject(tx, task.projectId);
     await logActivity(tx, { actorId, action: "task.created", entityType: "Task", entityId: task.id, clientId: task.clientId, changes: { title: task.title } });
     return task;
@@ -94,7 +98,7 @@ export async function updateTask(db: Db, id: string, input: TaskData, actorId: s
     const data = await withProjectClient(tx, input);
     if (data.assigneeId !== before.assigneeId) await assertAssignable(tx, data.assigneeId);
     const after = await tx.task.update({ where: { id }, data: columns(data) });
-    if (data.assigneeId !== before.assigneeId) await notify(tx, [data.assigneeId], actorId, { title: "Task assigned to you", body: after.title, href: `/tasks/${id}` });
+    if (data.assigneeId !== before.assigneeId) await notify(tx, [data.assigneeId], actorId, { title: "Task assigned to you", body: after.title, href: `/tasks/${id}`, email: true });
     for (const projectId of new Set([before.projectId, after.projectId])) if (projectId) await refreshProject(tx, projectId);
     const changes = diffChanges(before, after, TASK_FIELDS);
     if (Object.keys(changes).length) await logActivity(tx, { actorId, action: "task.updated", entityType: "Task", entityId: id, clientId: after.clientId, changes });
@@ -161,7 +165,7 @@ export async function bulkUpdateTasks(db: Db, input: { taskIds: string[]; assign
           await logActivity(tx, { actorId, action: "task.reassigned", entityType: "Task", entityId: task.id, clientId: task.clientId, changes: { assigneeId: { from: task.assigneeId, to: input.assigneeId || null } } });
         }
       }
-      if (input.assigneeId) await notify(tx, [input.assigneeId], actorId, { title: `${tasks.length} task${tasks.length === 1 ? "" : "s"} assigned to you`, href: "/tasks?mine=1" });
+      if (input.assigneeId) await notify(tx, [input.assigneeId], actorId, { title: `${tasks.length} task${tasks.length === 1 ? "" : "s"} assigned to you`, href: "/tasks?mine=1", email: true });
       return tasks.length;
     },
     { timeout: 60_000, maxWait: 10_000 },
@@ -174,7 +178,7 @@ export async function addComment(db: Db, input: { taskId: string; body: string; 
     const users = await tx.user.findMany({ where: { isActive: true }, select: { id: true, name: true } });
     const mentions = findMentions(input.body, users);
     await tx.taskComment.create({ data: { taskId: task.id, authorId: input.viewer.id, body: input.body, mentions } });
-    await notify(tx, mentions, input.viewer.id, { title: "You were mentioned on a task", body: input.body.slice(0, 200), href: `/tasks/${task.id}` });
+    await notify(tx, mentions, input.viewer.id, { title: "You were mentioned on a task", body: input.body.slice(0, 200), href: `/tasks/${task.id}`, email: true });
     await notify(tx, [task.assigneeId].filter((a) => !mentions.includes(a ?? "")), input.viewer.id, { title: "New comment on your task", body: input.body.slice(0, 200), href: `/tasks/${task.id}` });
   });
 }

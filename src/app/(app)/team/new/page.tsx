@@ -15,7 +15,7 @@ export default async function NewEmployeePage() {
       <EmployeeForm
         id={null}
         departments={departments.map((d) => ({ value: d.id, label: d.name }))}
-        defaults={{ name: "", email: "", role: "EMPLOYEE", phone: "", departmentId: "", designation: "", joiningDate: "", hourlyCost: "", dailyDigest: false }}
+        defaults={{ name: "", email: "", role: "EMPLOYEE", phone: "", departmentId: "", designation: "", joiningDate: "", hourlyCost: "", dailyDigest: false, emailOnTask: false }}
       />
     </div>
   );

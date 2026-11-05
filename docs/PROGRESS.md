@@ -202,4 +202,33 @@ See `docs/DECISIONS.md` → D-09.
   seconds (D-54). The cause inside Next.js is unknown. Sorting and paging on the content list aren't covered
   by the retry; they lost none in testing, and a second click would work.
 
-## Phase 6: Reminder engine, notifications, digests, email templates ⏳ (not started)
+## Phase 6: Reminder engine, notifications, digests, email templates ✅ (05 Nov 2026)
+
+### Done
+- **Reminder job**: every rule from the brief, stored as reminders. It can run any number of times with
+  no duplicates, closes reminders by itself when the situation is resolved, and reopens them if it returns.
+- **New rules**: tasks due soon, project deadlines, and content sent to a client who hasn't finished answering.
+- **Reminders page**: open, snoozed and done, with search, filters, sorting, paging and Excel. Mark done,
+  snooze for 1 day, 3 days or a custom time, and reopen.
+- **Notification bell**: counts unread notifications and reminders that need attention. Opens the new
+  page, which also lists every notification with mark read and mark all as read.
+- **Daily email digest**: to admins at the digest time set in Settings, once a day, leaving out what's
+  snoozed or done. Team members can opt in to a daily email of their own tasks.
+- **Emails for tasks**: team members can opt in to an email when assigned or mentioned.
+- **Email templates**: Settings → Email templates lists every message, with a live preview, misspelt
+  placeholders refused, send-me-a-test and reset. Includes the polite, firm and final payment reminders for Phase 7.
+- **Scheduled job**: `/api/cron/reminders`. Pages also start it, at most every 10 minutes.
+- **Tests**: 420 unit + integration tests (40 new), 50 end-to-end browser tests (6 new). All passing.
+
+### Known issues / limitations
+- Emails only leave the computer once SMTP is set in `.env`. Until then they print in the server window.
+- On this PC the database is a portable copy that stops when Windows logs off or shuts down. Run
+  `C:\Users\rezon\rezonest-postgres\start-database.cmd` before starting the app. The live version won't have this.
+- Without the scheduled job, the digest only goes out when someone opens the app after the digest time.
+- Digests are plain text.
+- Invoices and payments are sample data until Phase 7, so payment reminders link to pages that don't exist yet.
+- Marking a reminder done hides it until you reopen it, even if the task stays overdue. A change of due date
+  on a task that was due today or soon makes a new reminder.
+- The dashboard's alerts panel works from live data and doesn't show "due soon" tasks, as in the brief's panel list. The reminders page does.
+
+## Phase 7: GST invoices, payments, TDS, ledger and ageing ⏳ (not started)

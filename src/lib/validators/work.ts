@@ -177,6 +177,7 @@ export const employeeSchema = z.object({
     .refine((v) => v === "" || /^\d{1,8}(\.\d{1,2})?$/.test(v), "Enter an amount like 350")
     .transform((v) => v || null),
   dailyDigest: z.boolean(),
+  emailOnTask: z.boolean(),
 });
 export type EmployeeInput = z.input<typeof employeeSchema>;
 export type EmployeeData = z.output<typeof employeeSchema>;

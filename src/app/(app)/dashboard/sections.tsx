@@ -408,6 +408,7 @@ export async function AlertsSection({ scope, perms }: { scope: Scope; perms: Per
       retainerEndingDays: settings?.retainerEndingDays ?? 30,
       shortfallDaysLeft: settings?.shortfallDaysLeft ?? 5,
       renewalAlertDays: settings?.renewalAlertDays ?? [30, 15, 7, 1],
+      dueSoonDays: settings?.dueSoonDays ?? 3,
     },
   });
   return <AlertsPanel alerts={alerts} categories={ALERT_CATEGORIES} hiddenCount={hiddenCount} />;

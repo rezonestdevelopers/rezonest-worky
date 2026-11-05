@@ -5,7 +5,7 @@ import type { EmployeeData } from "@/lib/validators/work";
 import { BusinessError, logActivity, type Db, type Tx } from "./shared";
 
 function profile(d: EmployeeData) {
-  return { phone: d.phone, departmentId: d.departmentId, designation: d.designation, joiningDate: d.joiningDate ? keyToDate(d.joiningDate) : null, hourlyCost: d.hourlyCost, dailyDigest: d.dailyDigest };
+  return { phone: d.phone, departmentId: d.departmentId, designation: d.designation, joiningDate: d.joiningDate ? keyToDate(d.joiningDate) : null, hourlyCost: d.hourlyCost, dailyDigest: d.dailyDigest, emailOnTask: d.emailOnTask };
 }
 
 /** A single-use link to choose a password. Only its hash is stored. */

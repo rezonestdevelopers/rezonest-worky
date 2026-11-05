@@ -1,3 +1,4 @@
+import { TEMPLATE_DEFINITIONS } from "../../src/lib/email-templates";
 import type { BillingType, Prisma, PrismaClient, Priority } from "@prisma/client";
 
 /**
@@ -340,50 +341,7 @@ export const SERVICES: ServiceDef[] = [
 
 export const GENERAL_ONBOARDING = ["Advance payment received", "Kick-off meeting done"];
 
-export const EMAIL_TEMPLATES = [
-  {
-    key: "offer_send",
-    name: "Send offer",
-    subject: "Quotation {{offerNumber}} from Rezonest Digital & Services",
-    body: "Dear {{contactName}},\n\nThank you for your interest. Please find our quotation {{offerNumber}} for {{offerTitle}}.\n\nView & accept online: {{offerLink}}\n\nThis offer is valid until {{validUntil}}.\n\nWarm regards,\n{{agencyName}}",
-    whatsapp: "Hello {{contactName}}, please find our quotation {{offerNumber}} for {{offerTitle}}: {{offerLink}} — Team Rezonest",
-  },
-  {
-    key: "invoice_send",
-    name: "Send invoice",
-    subject: "Invoice {{invoiceNumber}} — {{amount}}",
-    body: "Dear {{contactName}},\n\nPlease find attached invoice {{invoiceNumber}} for {{amount}}, due on {{dueDate}}.\n\nUPI: {{upiId}}\n\nThank you,\n{{agencyName}}",
-    whatsapp: "Hello {{contactName}}, invoice {{invoiceNumber}} for {{amount}} is due on {{dueDate}}. UPI: {{upiId}} — Team Rezonest",
-  },
-  {
-    key: "payment_reminder_polite",
-    name: "Payment reminder — polite",
-    subject: "Gentle reminder: invoice {{invoiceNumber}}",
-    body: "Dear {{contactName}},\n\nThis is a gentle reminder that invoice {{invoiceNumber}} for {{amount}} was due on {{dueDate}}. If already paid, please ignore this message.\n\nRegards,\n{{agencyName}}",
-    whatsapp: "Hello {{contactName}}, gentle reminder: invoice {{invoiceNumber}} for {{amount}} was due on {{dueDate}}. Please ignore if already paid. 🙏",
-  },
-  {
-    key: "payment_reminder_firm",
-    name: "Payment reminder — firm",
-    subject: "Payment overdue: invoice {{invoiceNumber}}",
-    body: "Dear {{contactName}},\n\nInvoice {{invoiceNumber}} for {{amount}} is now overdue since {{dueDate}}. Kindly arrange the payment at the earliest.\n\nRegards,\n{{agencyName}}",
-    whatsapp: "Hello {{contactName}}, invoice {{invoiceNumber}} ({{amount}}) is overdue since {{dueDate}}. Kindly arrange payment at the earliest.",
-  },
-  {
-    key: "payment_reminder_final",
-    name: "Payment reminder — final",
-    subject: "Final reminder: invoice {{invoiceNumber}}",
-    body: "Dear {{contactName}},\n\nDespite earlier reminders, invoice {{invoiceNumber}} for {{amount}} remains unpaid. Please clear the dues within 3 days to avoid interruption of services.\n\nRegards,\n{{agencyName}}",
-    whatsapp: "Hello {{contactName}}, final reminder for invoice {{invoiceNumber}} ({{amount}}). Please clear within 3 days to avoid service interruption.",
-  },
-  {
-    key: "password_reset",
-    name: "Password reset",
-    subject: "Reset your Rezonest Work OS password",
-    body: "Hello {{name}},\n\nClick the link below to set a new password. The link is valid for 1 hour.\n\n{{resetLink}}\n\nIf you did not request this, you can ignore this email.",
-    whatsapp: null,
-  },
-];
+export const EMAIL_TEMPLATES = TEMPLATE_DEFINITIONS.map(({ key, name, subject, body, whatsapp }) => ({ key, name, subject, body, whatsapp }));
 
 export const DEFAULT_SETTINGS: Prisma.SettingsCreateInput = {
   id: "agency",

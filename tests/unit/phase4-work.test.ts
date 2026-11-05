@@ -168,7 +168,7 @@ describe("validators", () => {
     expect(timeLogSchema.safeParse({ ...l, minutes: 90 }).success).toBe(true);
   });
   it("validates a team member's hourly cost and email", () => {
-    const e = { name: "New Person", email: "NEW@Rezonest.com", role: "EMPLOYEE", phone: "", departmentId: "", designation: "", joiningDate: "", dailyDigest: false };
+    const e = { name: "New Person", email: "NEW@Rezonest.com", role: "EMPLOYEE", phone: "", departmentId: "", designation: "", joiningDate: "", dailyDigest: false, emailOnTask: false };
     const ok = employeeSchema.parse({ ...e, hourlyCost: "₹1,250" });
     expect(ok.email).toBe("new@rezonest.com");
     expect(ok.hourlyCost).toBe("1250");

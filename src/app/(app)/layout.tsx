@@ -1,7 +1,11 @@
+import { after } from "next/server";
 import { requireUser } from "@/lib/auth-guard";
 import { can, NAV_PERMISSION } from "@/lib/permissions";
 import { db } from "@/lib/db";
-import { formatDateTime, keyToDate, todayKey, addDaysKey } from "@/lib/dates";
+import { formatDateTime } from "@/lib/dates";
+import { runReminderJobIfStale } from "@/server/reminder-jobs";
+import { reminderAttentionCount } from "@/server/services/reminders";
+import { loadViewer } from "@/server/services/tasks";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { CommandPalette } from "@/components/layout/command-palette";
@@ -12,32 +16,16 @@ import { NotificationBell } from "@/components/layout/notification-bell";
 
 export const dynamic = "force-dynamic";
 
-/** Count of things needing attention today (bell badge until the Phase 6 notification centre). */
-async function attentionCount(userId: string, isAdmin: boolean) {
-  const today = keyToDate(todayKey());
-  const [unread, overdueTasks, overdueInvoices, renewals] = await Promise.all([
-    db.notification.count({ where: { userId, readAt: null } }),
-    db.task.count({
-      where: {
-        archivedAt: null,
-        status: { notIn: ["DONE", "WAITING_CLIENT_APPROVAL"] },
-        dueDate: { lt: today },
-        ...(isAdmin ? {} : { assigneeId: userId }),
-      },
-    }),
-    isAdmin ? db.invoice.count({ where: { type: "TAX", status: "ISSUED", paymentStatus: "OVERDUE" } }) : 0,
-    isAdmin ? db.domainHostingAsset.count({ where: { archivedAt: null, expiryDate: { gte: today, lte: keyToDate(addDaysKey(todayKey(), 7)) } } }) : 0,
-  ]);
-  return unread + overdueTasks + overdueInvoices + renewals;
-}
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
+  after(runReminderJobIfStale);
   const allowed = Object.entries(NAV_PERMISSION)
     .filter(([, perm]) => can(user.role, perm))
     .map(([key]) => key);
-  const [count, unread] = await Promise.all([
-    attentionCount(user.id, user.role === "ADMIN"),
+  const [reminders, unreadCount, unread] = await Promise.all([
+    loadViewer(db, user).then((viewer) => reminderAttentionCount(db, viewer)),
+    db.notification.count({ where: { userId: user.id, readAt: null } }),
     db.notification.findMany({ where: { userId: user.id, readAt: null }, orderBy: { createdAt: "desc" }, take: 8 }),
   ]);
   const bellItems = unread.map((n) => ({ id: n.id, title: n.title, body: n.body, href: n.href, when: formatDateTime(n.createdAt) }));
@@ -55,7 +43,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <CommandPalette allowed={allowed} />
           </div>
           <QuickAdd allowed={can(user.role, "work.manage") ? [...allowed, "work.manage"] : allowed} />
-          <NotificationBell count={count} items={bellItems} />
+          <NotificationBell reminders={reminders} unread={unreadCount} items={bellItems} />
           <ThemeToggle />
           <UserMenu name={user.name} email={user.email} role={user.role} canSettings={can(user.role, "settings.manage")} />
         </header>

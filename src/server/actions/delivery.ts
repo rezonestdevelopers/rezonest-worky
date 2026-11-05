@@ -9,7 +9,9 @@ import { assertPermission, ForbiddenError } from "@/lib/auth-guard";
 import { CONTENT_LINK_DAYS } from "@/lib/content-plan";
 import { formatMonthKey } from "@/lib/dates";
 import { db } from "@/lib/db";
+import { renderTemplate } from "@/lib/email-templates";
 import { sendMail } from "@/lib/mailer";
+import { getTemplate } from "@/server/services/email-templates";
 import { publicToken } from "@/lib/public-token";
 import { putFile, sniffImage } from "@/lib/storage";
 import {
@@ -163,15 +165,21 @@ async function shareDetails(clientId: string, month: string, actorId: string) {
   const url = `${process.env.APP_URL ?? "http://localhost:3000"}/p/content/${publicToken(link.id)}`;
   const contact = client.contacts[0];
   const agency = settings?.agencyName ?? "Rezonest";
-  const hello = `Hello ${contact?.name ?? client.companyName}`;
-  const body = `please review the ${formatMonthKey(month)} content for ${client.companyName}. You can approve each item or ask for changes here, with no login needed:\n\n${url}`;
+  const message = renderTemplate(await getTemplate(db, "content_approval"), {
+    contactName: contact?.name ?? client.companyName,
+    companyName: client.companyName,
+    month: formatMonthKey(month),
+    link: url,
+    linkDays: String(CONTENT_LINK_DAYS),
+    agencyName: agency,
+  });
   return {
     url,
     phone: contact?.whatsapp ?? contact?.phone ?? client.whatsapp ?? client.phone ?? null,
     email: contact?.email ?? client.email ?? null,
-    whatsapp: `${hello}, ${body}`,
-    subject: `${formatMonthKey(month)} content for your approval`,
-    text: `${hello},\n\nPlease review the ${formatMonthKey(month)} content for ${client.companyName}. You can approve each item or ask for changes here, with no login needed:\n\n${url}\n\nThe link works for ${CONTENT_LINK_DAYS} days.\n\n${agency}`,
+    whatsapp: message.whatsapp ?? message.text,
+    subject: message.subject,
+    text: message.text,
   };
 }
 

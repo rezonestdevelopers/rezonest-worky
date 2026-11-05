@@ -306,3 +306,38 @@ acts only if the address hasn't moved at all, so it can't undo a sort or page ch
 Worst case is a 4-second wait. Remove this if a later Next.js fixes it. The calendar's own links, such as the
 month arrows and cards, had the same problem, so they're plain links that load the whole page. That also
 stopped them fetching ahead, which removed about 70 requests from every page load.
+
+### D-55 One set of rules, two uses
+`collectAlerts` holds every reminder rule. The dashboard runs it live, so its filters apply. The job runs it
+for the whole agency and stores the results. So they can't disagree. The reminders page refreshes the stored
+ones each time it opens, because finishing a task should clear its reminder straight away.
+
+### D-56 How a reminder changes state
+One row per situation, found by its dedupe key, so repeated runs change nothing. Someone's Done stays done. If
+the situation just goes away it closes by itself, and comes back if the situation returns, such as a task
+reopened. A snooze wakes when its time is up. The job only overwrites a row nobody has changed since it read
+it, so a Done pressed at that moment isn't undone. Renewal keys include the 30/15/7/1 step, so a snooze
+at 30 days alerts again at 15.
+
+### D-57 Who sees which reminders
+Admins see all. Managers see all except invoices, payments and renewals, which show money or open Admin-only
+pages. Employees see reminders for tasks assigned to them. Those rules also apply when changing a reminder, and
+"restore snoozed" only touches your own. Phase 1's version let anyone restore everyone's, and is replaced.
+
+### D-58 Digest timing and once-a-day guarantee
+A person's digest is claimed in `DigestRun` before sending, and the database allows only one claim per person
+per day, so running the job twice can't send twice. A failed send gives the claim back, so the next run retries.
+It goes on the first run at or after the digest time, so a late run still sends that day. Hourly scheduling means
+a 09:00 digest goes at 09:00 if the job runs on the hour. The Settings switch stops all digests, not just yours.
+
+### D-59 Task emails are sent after the save
+A notification is marked as wanting email in the same save as the task, and sent just after it succeeds, so a
+slow mail server can't slow a save or fail it, and a failed save sends nothing. Each is marked before sending, so
+two runs can't send it twice; a failed send isn't retried. Older than a day is skipped, so no backlog arrives.
+Status changes and comments on your task stay in the app only: the brief asks for email on assignment and mention.
+
+### D-60 Email templates
+Each message has its starting text and the placeholders it can use in `src/lib/email-templates.ts`. A saved edit
+replaces the text, and Reset restores it. A placeholder it can't fill is refused, because a typo would send a client
+a blank. The preview and the real email use the same code. Digests are plain text so they stay editable like the
+others. WhatsApp text exists only where there's a WhatsApp action.

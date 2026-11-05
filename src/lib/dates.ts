@@ -17,6 +17,11 @@ export function istDateKey(instant: Date = new Date()): string {
   return format(new TZDate(instant.getTime(), TZ), "yyyy-MM-dd");
 }
 
+/** IST time of day of an instant → "HH:MM". */
+export function istTime(instant: Date = new Date()): string {
+  return format(new TZDate(instant.getTime(), TZ), "HH:mm");
+}
+
 /** A @db.Date value (UTC midnight) → "YYYY-MM-DD". */
 export function dateOnlyKey(d: Date): string {
   return d.toISOString().slice(0, 10);
