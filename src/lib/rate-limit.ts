@@ -22,5 +22,9 @@ export function rateLimit(key: string, limit: number, windowMs: number): { ok: b
 }
 
 export function clientIp(h: Headers): string {
-  return h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
+  // Set by our own proxy, so it can be trusted. In a forwarded list, only the last entry was added
+  // by a proxy we run: anything before it could have been typed in by the visitor to dodge a limit.
+  const real = h.get("x-real-ip")?.trim();
+  if (real) return real;
+  return h.get("x-forwarded-for")?.split(",").map((p) => p.trim()).filter(Boolean).at(-1) || "unknown";
 }

@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { FiltersBar } from "@/components/dashboard/filters-bar";
 import { buildScope, getFilterOptions, parseFilters, PRESETS } from "@/server/queries/dashboard/filters";
+import { myWeek } from "@/server/services/account";
 import { getMyTasks } from "@/server/queries/dashboard/data";
 import { db } from "@/lib/db";
 import { runBackupIfDue } from "@/server/backup-job";
@@ -116,7 +117,14 @@ function ChartsSkeleton() {
 /** Employees see only their own tasks (brief §4). */
 async function EmployeeDashboard({ userId, name }: { userId: string; name: string }) {
   const today = todayKey();
-  const { overdue, today: dueToday, upcoming } = await getMyTasks(userId, today);
+  const [{ overdue, today: dueToday, upcoming }, week] = await Promise.all([getMyTasks(userId, today), myWeek(db, userId, today)]);
+  const hours = Math.floor(week.minutesThisWeek / 60);
+  const stats = [
+    { label: "Overdue", value: overdue.length, tone: overdue.length ? "text-tone-red" : undefined },
+    { label: "Due today", value: dueToday.length },
+    { label: "Logged this week", value: `${hours}h ${week.minutesThisWeek % 60}m` },
+    { label: "On time this month", value: week.onTimePercent === null ? "—" : `${week.onTimePercent}%` },
+  ];
   const groups = [
     { title: "Overdue", list: overdue, empty: "Nothing overdue 🎉" },
     { title: "Due today", list: dueToday, empty: "Nothing due today" },
@@ -127,6 +135,19 @@ async function EmployeeDashboard({ userId, name }: { userId: string; name: strin
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Hello, {name.split(" ")[0]}</h1>
         <p className="text-sm text-muted-foreground">{formatDateKey(today)} · your tasks</p>
+      </div>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4" data-testid="my-week">
+        {stats.map((s) => (
+          <Card key={s.label} className="gap-1 py-4">
+            <CardContent className="px-4">
+              <div className="truncate text-xs text-muted-foreground">{s.label}</div>
+              <div className={`mt-1 text-xl font-semibold tabular-nums ${s.tone ?? ""}`}>{s.value}</div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="flex justify-end">
+        <Link href="/tasks?mine=1" className="text-sm font-medium underline-offset-4 hover:underline">See all my tasks</Link>
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
         {groups.map((g) => (
@@ -146,11 +167,12 @@ async function EmployeeDashboard({ userId, name }: { userId: string; name: strin
                       <Link href={`/tasks/${t.id}`} className="block hover:underline">
                         <div className="truncate text-sm font-medium">{t.title}</div>
                       </Link>
-                      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         <StatusBadge kind="task" value={t.status} />
                         <StatusBadge kind="priority" value={t.priority} />
-                        <span>{t.client}</span>
-                        <span className="tabular-nums">· {formatDateKey(t.dueKey)}</span>
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        {t.client} · <span className="whitespace-nowrap tabular-nums">{formatDateKey(t.dueKey)}</span>
                       </div>
                     </li>
                   ))}

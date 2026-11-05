@@ -7,8 +7,10 @@ import { BusinessError } from "@/server/services/shared";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ kind: string }> }) {
   try {
-    await assertPermission("finance.manage");
-    const doc = await loadReport((await params).kind, Object.fromEntries(req.nextUrl.searchParams));
+    const kind = (await params).kind;
+    // The client's monthly report has no fees, costs or team names. Everything else needs finance access.
+    await assertPermission(kind === "monthly" ? "reports.monthly" : "finance.manage");
+    const doc = await loadReport(kind, Object.fromEntries(req.nextUrl.searchParams));
     if (!doc) return NextResponse.json({ error: "Not found" }, { status: 404 });
     if (req.nextUrl.searchParams.get("format") === "xlsx") {
       const buffer = await buildReportWorkbook(doc);

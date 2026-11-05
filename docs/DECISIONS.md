@@ -447,3 +447,38 @@ Private files use addresses that check who's asking.
 
 ### D-82 Monthly reports default to last month
 That's the month that's finished. You can choose any month up to the current one. Your highlights and plan are stored per client and month.
+
+### D-83 Managers get the monthly client report only (owner's decision)
+It has no fees, costs or team names, so a Manager can open, word and email it. It does show the client's ad spend (D-76), which is
+the client's own money. Every other report stays admin-only. This is its own permission, so widening one doesn't widen the other.
+
+### D-84 Package updates for security
+next-auth went to 5.0.0-beta.32 and zod from 3 to 4. Zod's fix only exists in 4, and the change needed four small edits. Indirect
+packages postcss, uuid and @auth/core are forced to fixed versions in pnpm-workspace.yaml. Known flaws went from 15, with 3 critical,
+to 1. Most didn't affect this app, since it has no OAuth or email sign-in, but updating is simpler than re-arguing each one.
+
+### D-85 One known flaw accepted
+deepmerge-ts below 8 can run out of memory on recursive objects. It's used only by Prisma's own settings loader, on your config file,
+so no visitor's input reaches it. Forcing version 8 under Prisma risks the database layer, so it waits for Prisma to update.
+
+### D-86 Rate limits use the address our proxy saw
+They used to trust the first forwarded address, which a visitor can type in to get a fresh limit each time. Now it's the proxy's
+X-Real-IP, or the last forwarded entry. The Caddy file sets that header, and Vercel sets it by itself.
+
+### D-87 What the installable app stores
+Only the app's unchanging files, its icons and the offline page. Never pages or data, because a lost phone shouldn't hold client or
+money details. A test checks what's stored. So the app needs a connection to work, which suits figures that must be current.
+
+### D-88 Performance review
+Median of 5 loads on sample data, on this PC, from the production build: the server answers in 340 ms for the dashboard, 300 ms for the
+agency report and 130 to 190 ms for lists, and pages settle in a browser in about 0.9 to 1.5 seconds. No page needed a fix. Each page does its
+adding-up in the database and pages its lists. Indexes were added for the remaining foreign keys, status and date fields. They add a
+little work to each save, which is small next to reads for an app of this size.
+
+### D-89 Docker image kept simple
+It installs everything and runs the normal start command, rather than a trimmed build. The image is larger, but nothing about Prisma,
+PDF fonts or scripts behaves differently from what's been tested. The go-live check and seed also need the full install.
+
+### D-90 Jobs run hourly on the server
+All four are safe to repeat, so one small container calls them all every hour, and the daily ones do nothing once that day's work is
+done. That's fewer moving parts than a separate schedule for each, and a job missed for any reason catches up within the hour.

@@ -258,7 +258,7 @@ export async function ClientTab({ tab, clientId, showMoney }: { tab: string; cli
           <CardContent className="space-y-3 text-sm">
             <p className="text-muted-foreground">Each opens on screen and downloads as PDF and Excel.</p>
             <div className="flex flex-col gap-2">
-              <Link href={`/reports/client?client=${clientId}`} className="font-medium underline-offset-4 hover:underline">Client report (internal): everything, including prices and profit</Link>
+              {showMoney && <Link href={`/reports/client?client=${clientId}`} className="font-medium underline-offset-4 hover:underline">Client report (internal): everything, including prices and profit</Link>}
               <Link href={`/reports/monthly?client=${clientId}`} className="font-medium underline-offset-4 hover:underline">Monthly report for the client: no prices, costs or team names</Link>
             </div>
           </CardContent>

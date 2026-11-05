@@ -47,7 +47,7 @@ export async function previewImportAction(formData: FormData): Promise<PreviewRe
 const commitSchema = z.object({
   kind: kindSchema,
   rows: z
-    .array(z.object({ rowNumber: z.number().int().positive(), values: z.record(z.string().max(5000)) }))
+    .array(z.object({ rowNumber: z.number().int().positive(), values: z.record(z.string(), z.string().max(5000)) }))
     .min(1)
     .max(MAX_IMPORT_ROWS),
   allowDuplicateRows: z.array(z.number().int()).max(MAX_IMPORT_ROWS),

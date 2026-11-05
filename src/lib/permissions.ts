@@ -11,6 +11,7 @@ export type Permission =
   | "work.manage" // all projects & tasks
   | "work.own" // own / department tasks
   | "finance.manage" // prices, invoices, payments, expenses, profit
+  | "reports.monthly" // the client's monthly report: no fees, costs or team names
   | "team.manage"
   | "settings.manage";
 
@@ -22,10 +23,11 @@ const MATRIX: Record<Role, Permission[]> = {
     "work.manage",
     "work.own",
     "finance.manage",
+    "reports.monthly",
     "team.manage",
     "settings.manage",
   ],
-  MANAGER: ["dashboard.full", "sales.manage", "work.manage", "work.own"],
+  MANAGER: ["dashboard.full", "sales.manage", "work.manage", "work.own", "reports.monthly"],
   EMPLOYEE: ["work.own"],
 };
 
@@ -48,7 +50,7 @@ export const NAV_PERMISSION: Record<string, Permission> = {
   invoices: "finance.manage",
   payments: "finance.manage",
   expenses: "finance.manage",
-  reports: "finance.manage",
+  reports: "reports.monthly",
   team: "team.manage",
   settings: "settings.manage",
 };

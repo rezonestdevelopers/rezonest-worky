@@ -310,4 +310,24 @@ See `docs/DECISIONS.md` → D-09.
 - Reports are for admins only, for now. Phase 10 reviews what Managers should see.
 - Please have your CA check the GST summary before you rely on it for filing.
 
-## Phase 10: Employee portal, PWA, performance and security review, deployment ⏳ (not started)
+## Phase 10: Employee portal, PWA, performance and security review, deployment ✅ built, not yet online (05 Nov 2026)
+
+### Done
+- **Employee home**: overdue, due today, time logged this week and on-time % this month, with no money anywhere.
+- **My account**: for everyone. Change password, name, phone and email choices. Role, department and hourly cost stay with an admin.
+- **Permissions**: Managers can prepare and email the client's monthly report, and no other report. A browser test walks every area as Admin, Manager and Employee.
+- **Installable app**: icons, home-screen install and an offline page. Pages and data are never stored on the phone. Phones only offer it over https, so it can't be tried on a phone until the app is online.
+- **Security review**: see D-83 to D-87. Package updates took known flaws from 15 to 1. Rate limits can't be dodged with a forged address. Pages can't be framed, and browsers won't guess file types. Tests now fail if a new action or address has no permission check.
+- **Performance**: indexes added on the remaining foreign keys, status and date fields. The server answers each main page in 0.13 to 0.34 seconds, and a page is fully settled in a browser in about 0.9 to 1.5 seconds (sample data, this PC, production build). See D-88.
+- **Deployment**: Dockerfile, server setup, secure web address, scheduled jobs, Vercel settings, a step-by-step guide (docs/DEPLOYMENT.md) and `pnpm go-live-check`.
+- **Tests**: 645 unit and integration tests (39 new), and 88 browser tests on desktop and phone sizes (12 new).
+
+### Known issues / limitations
+- **Not online.** You chose to decide on hosting later. The Docker, Caddy and Vercel files **haven't been run**, because this PC has no Docker and there's no hosting account. Expect to check them on the first setup.
+- Installing on a phone needs the https address, so it's untested on a real phone.
+- One known flaw remains in a package: deepmerge-ts, inside the database tool's own settings handling, which outside input can't reach (D-85).
+- Changing your password doesn't sign you out on other devices. That session ends within 12 hours.
+- Timings were measured on sample data, on this PC, not on live traffic or years of records.
+- Accessibility was checked through labels and keyboard use in tests, not with a full audit or a screen reader.
+- Rate limits live in server memory, so they reset on restart, and each copy counts separately on Vercel.
+- Earlier items still open: your SMTP details, the CA's confirmation of GST questions (D-62, D-70, D-75), and starting the database with Windows on this PC.

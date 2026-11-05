@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Settings } from "lucide-react";
+import { LogOut, Settings, UserRound } from "lucide-react";
 import Link from "next/link";
 import { logoutAction } from "@/server/actions/auth";
 import {
@@ -29,6 +29,9 @@ export function UserMenu({ name, email, role, canSettings }: { name: string; ema
           <div className="mt-1 text-[11px] tracking-wide uppercase">{role.toLowerCase()}</div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/account"><UserRound /> My account</Link>
+        </DropdownMenuItem>
         {canSettings && (
           <DropdownMenuItem asChild>
             <Link href="/settings"><Settings /> Settings</Link>

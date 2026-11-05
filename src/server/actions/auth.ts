@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { passwordSchema } from "@/lib/validators/account";
 import { signIn, signOut, LOCK_MINUTES } from "@/auth";
 import { db } from "@/lib/db";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
@@ -78,13 +79,6 @@ export async function requestPasswordResetAction(_: FormState, formData: FormDat
   });
   return generic;
 }
-
-const passwordSchema = z
-  .string()
-  .min(8, "Password must be at least 8 characters.")
-  .max(200)
-  .regex(/[A-Za-z]/, "Password must contain a letter.")
-  .regex(/[0-9]/, "Password must contain a number.");
 
 export async function resetPasswordAction(_: FormState, formData: FormData): Promise<FormState> {
   const token = String(formData.get("token") ?? "");

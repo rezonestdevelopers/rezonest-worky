@@ -1,0 +1,66 @@
+# The live setup on one server: database, app, secure web address, and scheduled jobs.
+# See docs/DEPLOYMENT.md. Everything secret comes from the .env file beside this one.
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rezonest
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: rezonest_workos
+      TZ: Asia/Kolkata
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rezonest -d rezonest_workos"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # No ports here: the database can't be reached from the internet.
+
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://rezonest:${POSTGRES_PASSWORD}@db:5432/rezonest_workos?schema=public
+      NODE_ENV: production
+      PG_DUMP_PATH: pg_dump
+      TZ: Asia/Kolkata
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - storage:/app/storage
+
+  web:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?Set APP_DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+  jobs:
+    image: curlimages/curl:8
+    restart: unless-stopped
+    environment:
+      CRON_SECRET: ${CRON_SECRET:?Set CRON_SECRET in .env}
+    entrypoint: ["sh", "/jobs.sh"]
+    volumes:
+      - ./deploy/jobs.sh:/jobs.sh:ro
+    depends_on:
+      - app
+
+volumes:
+  pgdata:
+  storage:
+  caddy_data:
+  caddy_config:

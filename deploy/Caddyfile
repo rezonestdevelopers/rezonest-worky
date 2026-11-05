@@ -1,0 +1,11 @@
+# Gets and renews the https certificate by itself, once your domain points at this server.
+{$APP_DOMAIN} {
+	encode gzip
+	# The app's rate limits need the visitor's real address, not one they typed in.
+	reverse_proxy app:3000 {
+		header_up X-Real-IP {remote_host}
+	}
+	request_body {
+		max_size 25MB
+	}
+}

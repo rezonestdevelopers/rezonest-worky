@@ -287,7 +287,7 @@ export async function previewAdImportAction(formData: FormData): Promise<AdPrevi
 const commitSchema = z.object({
   clientId: z.string().min(1).max(60),
   rows: z.array(z.object({ rowNumber: z.number().int().positive(), cells: z.array(z.string().max(1000)).max(200) })).min(1).max(MAX_AD_IMPORT_ROWS),
-  columns: z.record(z.number().int().min(0).max(200)),
+  columns: z.record(z.string(), z.number().int().min(0).max(200)),
 });
 
 /** Step 2: save the rows that passed. Every row is checked again on the server. */

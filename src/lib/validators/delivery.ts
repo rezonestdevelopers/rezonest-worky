@@ -74,7 +74,7 @@ export const campaignSchema = z
 export type CampaignInput = z.input<typeof campaignSchema>;
 export type CampaignData = z.output<typeof campaignSchema>;
 
-const count = (label: string) => z.coerce.number({ invalid_type_error: `${label} must be a whole number` }).int(`${label} must be a whole number`).min(0, `${label} can't be negative`).max(2_000_000_000);
+const count = (label: string) => z.coerce.number({ error: `${label} must be a whole number` }).int(`${label} must be a whole number`).min(0, `${label} can't be negative`).max(2_000_000_000);
 
 export const spendEntrySchema = z
   .object({

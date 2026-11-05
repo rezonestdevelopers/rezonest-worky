@@ -3,7 +3,7 @@
 Internal agency management system for **Rezonest Digital & Services**, Bhosari, Pune.
 Leads → offers → projects → tasks → GST invoices → payments, all in one place.
 
-> Status: **Phase 9 done** (agency, client and monthly reports as PDF and Excel, GST summary, data export, daily backups).
+> Status: **All 10 phases built.** Runs on this PC. Not online yet: see docs/DEPLOYMENT.md.
 > See [`docs/PROGRESS.md`](docs/PROGRESS.md) for what's built and what's next.
 
 ---
@@ -110,16 +110,11 @@ On Vercel, add them under Cron Jobs. On a VPS, add them to cron. The first moves
 
 **Keep `AUTH_SECRET` and `APP_URL` correct when going live.** Client offer links are built from them, so changing `AUTH_SECRET` later stops existing links working.
 
-## 4. Going live (summary, full guide in Phase 10)
+## 4. Going live
 
-**Option A: Vercel + managed PostgreSQL in Mumbai** (Neon / Supabase / AWS RDS `ap-south-1`)
-1. Create the database, copy its connection string into Vercel → Settings → Environment Variables as `DATABASE_URL`, plus all other variables from `.env.example`.
-2. Build command: `pnpm db:deploy && pnpm build`.
-3. Run once: `pnpm db:seed --no-sample` (creates settings, services and your admin login).
+**[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** has the full steps for both options: a small server in Mumbai with Docker, or Vercel with a managed database. The Docker and Vercel files haven't been run yet, so expect to check them on the first setup.
 
-**Option B: VPS with Docker** (e.g. AWS Lightsail Mumbai). A Dockerfile arrives in Phase 10.
-
-Before going live: `pnpm db:wipe-sample`, then set your real GSTIN, bank and UPI details in **Settings**.
+Before real use, run `pnpm go-live-check`. It only reads, and lists what's left: secrets, email, sample data, default passwords, GSTIN and more.
 
 ## 5. Backups & restore
 
@@ -157,6 +152,7 @@ Settings → **Data export** downloads any table as Excel or CSV, or everything 
 - **Change invoice / quotation number format?** Settings → *Numbering*. Use `{FY}` and `{SEQ}`.
   Numbers restart each 1 April and are never reused. Changes affect future documents only.
 - **Change the brand colour?** Settings → *Branding*, or edit `--brand` in `src/app/globals.css`.
+- **Change my password or details?** Your initial in the top corner → *My account*. You can install the app on your phone from there too, once it's online.
 - **Add a new employee?** Go to Team → Add person. Enter their name, email, department and access level. They get an email with a link to choose their own password; it lasts 3 days, and "Send password link" on their page sends a new one. To remove someone, open their page and choose Deactivate. Their history stays, and you decide who takes their open tasks.
 - **Bring in my existing clients or leads?** Clients (or Leads) → *Import* → *Download template*, fill it in, upload it.
   You see a preview with errors and possible duplicates first. Nothing is saved until you click Import.

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Providers } from "@/components/providers";
+import { PwaRegister } from "@/components/layout/pwa-register";
 import { getSettings, safeHex } from "@/lib/settings";
 import "./globals.css";
 
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
   title: { default: "Rezonest Work OS", template: "%s · Rezonest Work OS" },
   description: "Agency management system for Rezonest Digital & Services",
   robots: { index: false, follow: false },
+  appleWebApp: { capable: true, title: "Work OS", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
@@ -34,6 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     >
       <body>
         <Providers>{children}</Providers>
+        <PwaRegister />
       </body>
     </html>
   );

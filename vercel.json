@@ -1,0 +1,9 @@
+{
+  "buildCommand": "pnpm db:deploy && pnpm build",
+  "regions": ["bom1"],
+  "crons": [
+    { "path": "/api/cron/reminders", "schedule": "0 * * * *" },
+    { "path": "/api/cron/daily-work", "schedule": "30 18 * * *" },
+    { "path": "/api/cron/expire-offers", "schedule": "35 18 * * *" }
+  ]
+}

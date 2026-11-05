@@ -155,7 +155,7 @@ test.describe("Phase 9: reports, GST summary, data export, backups", () => {
     }
   });
 
-  test("a manager can't reach reports or backups either", async ({ page, request }) => {
+  test("nobody signed out can reach a report, and employees can't download one", async ({ page, request }) => {
     const anonymous = await request.get("/api/reports/agency", { maxRedirects: 0 });
     expect([302, 303, 307, 401, 403]).toContain(anonymous.status());
     await login(page, "kunal@rezonest.com", "Employee@123");

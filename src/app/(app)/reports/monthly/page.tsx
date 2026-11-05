@@ -20,7 +20,7 @@ export const metadata: Metadata = { title: "Monthly client report" };
 const selectClass = "h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-2 text-sm shadow-xs";
 
 export default async function MonthlyReportPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  await requirePermission("finance.manage");
+  await requirePermission("reports.monthly");
   const sp = await searchParams;
   const today = todayKey();
   const month = reportMonth(param(sp, "month"), today);

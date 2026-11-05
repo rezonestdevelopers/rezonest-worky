@@ -20,7 +20,7 @@ const month = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Choose a month");
 const noteSchema = z.object({ clientId: z.string().min(1).max(60), month, highlights: optionalText(5000), nextPlan: optionalText(5000) });
 
 export async function saveReportNoteAction(input: z.input<typeof noteSchema>): Promise<ActionResult> {
-  return runAction("finance.manage", async (user) => {
+  return runAction("reports.monthly", async (user) => {
     const parsed = noteSchema.safeParse(input);
     if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
     await saveReportNote(db, parsed.data, user.id);
@@ -32,7 +32,7 @@ export async function saveReportNoteAction(input: z.input<typeof noteSchema>): P
 const emailSchema = z.object({ clientId: z.string().min(1).max(60), month, to: z.string().trim().toLowerCase().email("Enter a valid email address") });
 
 export async function emailMonthlyReportAction(input: z.input<typeof emailSchema>): Promise<ActionResult> {
-  return runAction("finance.manage", async (user) => {
+  return runAction("reports.monthly", async (user) => {
     const parsed = emailSchema.safeParse(input);
     if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
     const { clientId, month: m, to } = parsed.data;

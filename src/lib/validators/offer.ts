@@ -129,7 +129,7 @@ export type OfferStatusInput = z.input<typeof offerStatusSchema>;
 export const publicAcceptSchema = z.object({
   token: z.string().max(64),
   name: z.string().trim().min(2, "Please enter your name").max(120),
-  agreed: z.literal(true, { errorMap: () => ({ message: "Please tick the box to confirm" }) }),
+  agreed: z.literal(true, { error: "Please tick the box to confirm" }),
 });
 
 export const publicChangesSchema = z.object({
