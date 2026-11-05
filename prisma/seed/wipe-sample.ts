@@ -31,6 +31,7 @@ async function main() {
     db.reminder.deleteMany(),
     db.digestRun.deleteMany(),
     db.emailLog.deleteMany(),
+    db.invoiceRun.deleteMany(),
     db.paymentAllocation.deleteMany(),
     db.payment.deleteMany(),
     db.creditNote.deleteMany(),

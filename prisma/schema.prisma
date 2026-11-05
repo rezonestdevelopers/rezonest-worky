@@ -1257,6 +1257,13 @@ model InvoiceItem {
   @@index([serviceId])
 }
 
+/// Each retainer month and renewal is drafted once: retainer:<projectId>:<month>, renewal:<assetId>:<expiry>.
+model InvoiceRun {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  createdAt DateTime @default(now())
+}
+
 model CreditNote {
   id            String   @id @default(cuid())
   number        String   @unique // REZ/CN/2026-27/0001
@@ -1268,7 +1275,9 @@ model CreditNote {
   cgstAmount    Decimal  @default(0) @db.Decimal(14, 2)
   sgstAmount    Decimal  @default(0) @db.Decimal(14, 2)
   igstAmount    Decimal  @default(0) @db.Decimal(14, 2)
+  roundOff      Decimal  @default(0) @db.Decimal(14, 2)
   totalAmount   Decimal  @db.Decimal(14, 2)
+  lines         Json?    // what was credited, line by line
   createdById   String?
   createdAt     DateTime @default(now())
 

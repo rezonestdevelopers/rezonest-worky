@@ -35,6 +35,7 @@ import {
 import { getTaskList } from "@/server/queries/tasks";
 import { refreshProject } from "@/server/services/projects";
 import { loadViewer, type Viewer } from "@/server/services/tasks";
+import { OpenDraftButton } from "@/app/(app)/invoices/open-draft-button";
 import { ChangeRequestsPanel, MilestonesPanel, RetainerMonthButton, TargetsPanel } from "./project-panels";
 
 export const metadata: Metadata = { title: "Project" };
@@ -125,10 +126,10 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
       <Suspense key={tab} fallback={<Skeleton className="h-72 w-full rounded-xl" />}>
         {tab === "overview" && <Overview project={project} viewer={viewer} showMoney={showMoney} canManage={canManage} />}
         {tab === "tasks" && <TasksTab projectId={id} viewer={viewer} />}
-        {tab === "deliverables" && <DeliverablesTab project={project} canManage={canManage} />}
+        {tab === "deliverables" && <DeliverablesTab showMoney={showMoney} project={project} canManage={canManage} />}
         {tab === "milestones" && <MilestonesTab projectId={id} canManage={canManage} showMoney={showMoney} />}
         {tab === "targets" && <TargetsTab projectId={id} canManage={canManage} />}
-        {tab === "changes" && canManage && <ChangesTab projectId={id} />}
+        {tab === "changes" && canManage && <ChangesTab showMoney={showMoney} projectId={id} />}
         {tab === "onboarding" && canManage && <OnboardingTab project={project} />}
       </Suspense>
     </div>
@@ -143,6 +144,9 @@ async function Overview({ project, viewer, showMoney, canManage }: { project: He
   const onboardingDone = items.filter((i) => i.isDone).length;
   return (
     <div className="space-y-4">
+      {showMoney && project.services.some((s) => s.billingType !== "MONTHLY_RETAINER") && (
+        <div className="flex justify-end"><OpenDraftButton kind="project" id={project.id} label="Invoice one-time work" /></div>
+      )}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         <Stat label="Progress" value={`${project.progressPercent}%`} />
         <Stat label="Open tasks" value={o.open} />
@@ -223,7 +227,7 @@ async function TasksTab({ projectId, viewer }: { projectId: string; viewer: View
   );
 }
 
-async function DeliverablesTab({ project, canManage }: { project: Header; canManage: boolean }) {
+async function DeliverablesTab({ project, canManage, showMoney }: { project: Header; canManage: boolean; showMoney: boolean }) {
   const [{ rows, months }, runs] = await Promise.all([getProjectDeliverables(project.id), project.isRetainer ? getRetainerRuns(project.id) : []]);
   const thisMonth = currentMonth();
   const nextMonth = shiftMonth(thisMonth, 1);
@@ -231,6 +235,14 @@ async function DeliverablesTab({ project, canManage }: { project: Header; canMan
   const inPeriod = (m: string) => !project.retainerEnd || `${m}-01` <= dateOnlyKey(project.retainerEnd);
   return (
     <div className="space-y-4">
+      {showMoney && project.isRetainer && (
+        <Card>
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 text-sm">
+            <p className="text-muted-foreground">Each month&apos;s invoice is drafted automatically on day {project.retainerTaskDay}, for you to review. It&apos;s never sent by itself.</p>
+            <OpenDraftButton kind="retainer" id={project.id} month={thisMonth} label={`Invoice ${formatMonthKey(thisMonth)}`} />
+          </CardContent>
+        </Card>
+      )}
       {canManage && project.isRetainer && project.status === "ACTIVE" && (
         <Card>
           <CardContent className="flex flex-wrap items-center justify-between gap-3 text-sm">
@@ -302,6 +314,8 @@ async function MilestonesTab({ projectId, canManage, showMoney }: { projectId: s
         amount: showMoney && m.amount ? formatINR(m.amount) : null,
         status: m.status,
         openTasks: m._count.tasks,
+        invoice: showMoney && m.invoices[0] ? { id: m.invoices[0].id, label: m.invoices[0].number ?? "Draft invoice" } : null,
+        canInvoice: showMoney && !!m.paymentPercent && !m.invoices.length,
       }))}
     />
   );
@@ -327,14 +341,16 @@ async function TargetsTab({ projectId, canManage }: { projectId: string; canMana
   );
 }
 
-async function ChangesTab({ projectId }: { projectId: string }) {
+async function ChangesTab({ projectId, showMoney }: { projectId: string; showMoney: boolean }) {
   const [rows, { rows: deliverables }] = await Promise.all([getProjectChangeRequests(projectId), getProjectDeliverables(projectId)]);
   return (
     <ChangeRequestsPanel
       projectId={projectId}
+      showMoney={showMoney}
       deliverables={deliverables.slice(0, 100).map((d) => ({ value: d.id, label: d.title }))}
       rows={rows.map((c) => ({
         id: c.id, description: c.description, estimate: formatINR(c.estimate), isBillable: c.isBillable, status: c.status, deliverable: c.deliverable?.title ?? null, created: formatDate(c.createdAt),
+        canInvoice: showMoney && c.status === "APPROVED" && c.isBillable && !c.invoiceItemId,
       }))}
     />
   );

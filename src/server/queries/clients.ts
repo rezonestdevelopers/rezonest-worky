@@ -213,7 +213,7 @@ export const clientTabQueries = {
     }),
   invoices: (clientId: string) =>
     db.invoice.findMany({
-      where: { clientId },
+      where: { clientId, NOT: { status: "CANCELLED", number: null } },
       orderBy: { invoiceDate: "desc" },
       take: TAKE,
       select: { id: true, number: true, type: true, status: true, paymentStatus: true, invoiceDate: true, dueDate: true, grandTotal: true, balanceDue: true },

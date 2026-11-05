@@ -113,6 +113,13 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  await db.invoiceRun.deleteMany();
+  await db.paymentAllocation.deleteMany();
+  await db.payment.deleteMany();
+  await db.creditNote.deleteMany();
+  await db.invoiceItem.deleteMany();
+  await db.invoice.updateMany({ data: { convertedFromId: null } });
+  await db.invoice.deleteMany();
   await db.notification.deleteMany();
   await db.passwordResetToken.deleteMany();
   await db.contentCalendarItem.deleteMany();
@@ -205,7 +212,7 @@ describe("offer → project", () => {
     expect(saved.services).toHaveLength(1);
     expect(saved.services[0].rate.toString()).toBe("100000");
     // 1,00,000 + 18% GST, half each
-    expect(saved.milestones[0].amount?.toString()).toBe("59000");
+    expect(saved.milestones[0].amount?.toString()).toBe("50000"); // half the work, before GST
     expect(saved.targets.map((t) => t.metric)).toEqual(["Pages"]);
     expect(saved.tasks.map((t) => t.title)).toEqual(["Requirements", "Development", "Launch"]);
     expect(saved.tasks[0].milestoneId).toBe(saved.milestones[0].id);

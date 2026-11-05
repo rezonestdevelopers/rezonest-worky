@@ -341,3 +341,47 @@ Each message has its starting text and the placeholders it can use in `src/lib/e
 replaces the text, and Reset restores it. A placeholder it can't fill is refused, because a typo would send a client
 a blank. The preview and the real email use the same code. Digests are plain text so they stay editable like the
 others. WhatsApp text exists only where there's a WhatsApp action.
+
+### D-61 Milestones bill one-time work, before GST (owner's decision)
+A milestone's percentage applies to the offer's one-time and milestone items before GST, and GST is added on the
+invoice at each item's rate. Retainers get their own monthly invoices, so nothing is billed twice. Offers, their PDFs,
+projects and invoices all use this. A project with percentage milestones can't also bill its whole one-time work.
+
+### D-62 Advances prompt to convert a proforma (owner's decision)
+Money received is saved as the client's advance. If that client has an open proforma, the payment page offers to convert
+it into a tax invoice dated the day the money came, and apply the money. You click; it doesn't happen by itself. A proforma
+never takes a payment directly and isn't on the statement, because it isn't a bill. Please confirm GST on advances with your CA.
+
+### D-63 GST checks block issuing (owner's decision)
+A GST tax invoice, including one made by converting a proforma, needs your GSTIN and a SAC code on every line. Drafts,
+proformas, no-GST and export invoices don't. These checks run on the server when issuing, and the draft lists what's missing.
+
+### D-64 Issuing freezes the document
+The number comes from the same save as the issue, so a failure leaves no gap. Tax is worked out again at that moment in
+case the client's state changed. Agency, client, bank, UPI, logo and signature details are stored on the invoice, so later
+changes in Settings don't alter it. Older sample invoices have partial stored details, and show today's for the rest.
+
+### D-65 Money changes take a lock per invoice
+Issuing, paying, crediting, converting and cancelling take a database lock on that invoice for their save, so two clicks
+or two people can't double-issue or overpay. Paid, TDS, credited and balance are always recomputed from the records rather
+than adjusted, and voided payments don't count.
+
+### D-66 Cancelling, credit notes and voiding
+An invoice with money on it or a credit note can't be cancelled. Remove the payment first and it becomes an advance.
+A credit note can't exceed what's unpaid, and can't exceed what's left on a line, so a credit note on a paid invoice needs
+the payment removed first. There's no record of refunds yet. Removing a payment clears any TDS on that invoice from the
+payment, since TDS is deducted against an invoice and can't be an advance. Voiding keeps the record, for a mistake or a bounced cheque.
+
+### D-67 Retainer and renewal drafts
+The daily job drafts each retainer's month on its day, for the full monthly value with no part-month reduction, and each
+renewal 30 days before expiry when it has a renewal price. Keys in `InvoiceRun` make each one once, even if you discard the
+draft, so a discarded draft isn't made again the next morning. You can still make one by hand from the project or renewal.
+Nothing is issued or sent by itself.
+
+### D-68 Ageing matches the dashboard
+The ageing report has Not yet due, 1–30, 31–60, 61–90 and 90+ days past the due date, the same as the dashboard (D-09). The
+brief's 0–30 is split into not yet due and 1–30 because they call for different actions. It also shows each client's advance,
+which isn't taken off what's owed until applied. The statement's closing balance does take it off, as an account statement should.
+
+### D-69 Discarded drafts
+Discarding marks a draft Cancelled and keeps the record, as nothing is hard-deleted. With no number it's hidden from lists.

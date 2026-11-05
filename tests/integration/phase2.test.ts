@@ -34,6 +34,7 @@ beforeEach(async () => {
   await db.payment.deleteMany();
   await db.creditNote.deleteMany();
   await db.invoiceItem.deleteMany();
+  await db.invoice.updateMany({ data: { convertedFromId: null } });
   await db.invoice.deleteMany();
   await db.onboardingChecklist.deleteMany();
   await db.task.deleteMany();

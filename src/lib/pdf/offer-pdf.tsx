@@ -49,7 +49,7 @@ const s = StyleSheet.create({
   footer: { position: "absolute", bottom: 22, left: 36, right: 36, flexDirection: "row", justifyContent: "space-between", fontSize: 7.5, color: MUTED },
 });
 
-async function logoSrc(logoKey: string | null | undefined) {
+export async function logoSrc(logoKey: string | null | undefined) {
   if (logoKey) {
     const file = await getFile(logoKey);
     if (file) return `data:${mimeFor(logoKey)};base64,${file.toString("base64")}`;
@@ -138,7 +138,7 @@ export async function renderOfferPdf(doc: OfferDocument, logoKey?: string | null
 
         {doc.milestones.length > 0 && (
           <View style={s.section} wrap={false}>
-            <Text style={s.sectionTitle}>Payment milestones</Text>
+            <Text style={s.sectionTitle}>Payment milestones (one-time work, before GST)</Text>
             {doc.milestones.map((m, i) => (
               <View key={i} style={s.totalRow}>
                 <Text>{m.name} ({m.percent})</Text>

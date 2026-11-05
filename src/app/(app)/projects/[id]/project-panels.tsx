@@ -17,6 +17,7 @@ import { FieldNote, NONE } from "@/components/shared/form-fields";
 import type { ActionResult } from "@/lib/action-result";
 import { formatDateKey, formatMonthKey } from "@/lib/dates";
 import { cn } from "@/lib/utils";
+import { OpenDraftButton } from "@/app/(app)/invoices/open-draft-button";
 import { createChangeRequestAction, createRetainerMonthAction, decideChangeRequestAction, saveMilestoneAction, saveTargetAction, saveTargetProgressAction } from "@/server/actions/work";
 
 function useAct() {
@@ -36,7 +37,7 @@ function useAct() {
   return { pending, run, error, setError };
 }
 
-type MilestoneRow = { id: string; name: string; dueDate: string | null; paymentPercent: string | null; amount: string | null; status: string; openTasks: number };
+type MilestoneRow = { id: string; name: string; dueDate: string | null; paymentPercent: string | null; amount: string | null; status: string; openTasks: number; invoice?: { id: string; label: string } | null; canInvoice?: boolean };
 
 export function MilestonesPanel({ projectId, rows, today, canManage }: { projectId: string; rows: MilestoneRow[]; today: string; canManage: boolean }) {
   const { pending, run, error, setError } = useAct();
@@ -87,7 +88,7 @@ export function MilestonesPanel({ projectId, rows, today, canManage }: { project
                     <div className="text-xs text-muted-foreground">
                       {m.dueDate ? <span className={cn(missed && "font-medium text-tone-red")}>{missed ? "Missed: " : "Due "}{formatDateKey(m.dueDate)}</span> : "No due date"}
                       {m.paymentPercent && ` · ${Number(m.paymentPercent)}% payment`}
-                      {m.amount && ` (${m.amount})`}
+                      {m.amount && ` (${m.amount} before GST)`}
                       {m.openTasks > 0 && ` · ${m.openTasks} open task${m.openTasks === 1 ? "" : "s"}`}
                     </div>
                   </div>
@@ -96,6 +97,8 @@ export function MilestonesPanel({ projectId, rows, today, canManage }: { project
                     {canManage && !done && <Button variant="outline" size="sm" disabled={pending} onClick={() => save(true, m)}><Check /> Mark done</Button>}
                     {canManage && done && <Button variant="ghost" size="sm" disabled={pending} onClick={() => save(false, m)}>Reopen</Button>}
                     {canManage && <Button variant="ghost" size="sm" onClick={() => open(m)}>Edit</Button>}
+                    {m.invoice && <a href={`/invoices/${m.invoice.id}`} className="px-2 text-sm font-medium whitespace-nowrap hover:underline">{m.invoice.label}</a>}
+                    {m.canInvoice && <OpenDraftButton kind="milestone" id={m.id} label="Invoice" />}
                   </div>
                 </li>
               );
@@ -224,9 +227,9 @@ export function TargetsPanel({ projectId, rows, currentMonth, canManage }: { pro
   );
 }
 
-type ChangeRow = { id: string; description: string; estimate: string; isBillable: boolean; status: string; deliverable: string | null; created: string };
+type ChangeRow = { id: string; description: string; estimate: string; isBillable: boolean; status: string; deliverable: string | null; created: string; canInvoice?: boolean };
 
-export function ChangeRequestsPanel({ projectId, rows, deliverables }: { projectId: string; rows: ChangeRow[]; deliverables: { value: string; label: string }[] }) {
+export function ChangeRequestsPanel({ projectId, rows, deliverables, showMoney }: { projectId: string; rows: ChangeRow[]; deliverables: { value: string; label: string }[]; showMoney?: boolean }) {
   const { pending, run, error, setError } = useAct();
   const [adding, setAdding] = useState(false);
   const [description, setDescription] = useState("");
@@ -242,9 +245,12 @@ export function ChangeRequestsPanel({ projectId, rows, deliverables }: { project
       <CardHeader>
         <div>
           <CardTitle>Change requests</CardTitle>
-          <CardDescription>Extra revisions or work outside the offer. Approved billable requests can go on the next invoice (Phase 7).</CardDescription>
+          <CardDescription>Extra revisions or work outside the offer. Approved billable requests can go on an invoice.</CardDescription>
         </div>
-        <Button variant="outline" size="sm" onClick={() => { setError(undefined); setDescription(""); setEstimate(""); setBillable(true); setDeliverable(""); setAdding(true); }}><Plus /> Log request</Button>
+        <div className="flex flex-wrap gap-2">
+          {showMoney && rows.some((c) => c.canInvoice) && <OpenDraftButton kind="changes" id={projectId} ids={rows.filter((c) => c.canInvoice).map((c) => c.id)} label="Invoice approved requests" />}
+          <Button variant="outline" size="sm" onClick={() => { setError(undefined); setDescription(""); setEstimate(""); setBillable(true); setDeliverable(""); setAdding(true); }}><Plus /> Log request</Button>
+        </div>
       </CardHeader>
       <CardContent>
         {rows.length === 0 ? (

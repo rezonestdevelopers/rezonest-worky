@@ -92,7 +92,7 @@ test.describe("Phase 1 — auth, dashboard, settings, search", () => {
 
   test("unbuilt sections show a phase placeholder", async ({ page }) => {
     await login(page);
-    await page.goto("/invoices");
-    await expect(page.getByText(/coming in Phase 7/)).toBeVisible();
+    await page.goto("/expenses");
+    await expect(page.getByText(/coming in Phase 8/)).toBeVisible();
   });
 });

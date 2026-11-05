@@ -81,7 +81,7 @@ export const TEMPLATE_DEFINITIONS: TemplateDefinition[] = [
   {
     key: "invoice_send",
     name: "Send invoice",
-    when: "When you send an invoice. Used from Phase 7.",
+    when: "When you send an invoice.",
     subject: "Invoice {{invoiceNumber}} — {{amount}}",
     body: "Dear {{contactName}},\n\nPlease find attached invoice {{invoiceNumber}} for {{amount}}, due on {{dueDate}}.\n\nUPI: {{upiId}}\n\nThank you,\n{{agencyName}}",
     whatsapp: "Hello {{contactName}}, invoice {{invoiceNumber}} for {{amount}} is due on {{dueDate}}. UPI: {{upiId}} — Team Rezonest",
@@ -90,7 +90,7 @@ export const TEMPLATE_DEFINITIONS: TemplateDefinition[] = [
   {
     key: "payment_reminder_polite",
     name: "Payment reminder: polite",
-    when: "When you click to send a polite reminder. Never sent by itself. Used from Phase 7.",
+    when: "When you click to send a polite reminder. Never sent by itself.",
     subject: "Gentle reminder: invoice {{invoiceNumber}}",
     body: "Dear {{contactName}},\n\nThis is a gentle reminder that invoice {{invoiceNumber}} for {{amount}} was due on {{dueDate}}. If already paid, please ignore this message.\n\nRegards,\n{{agencyName}}",
     whatsapp: "Hello {{contactName}}, gentle reminder: invoice {{invoiceNumber}} for {{amount}} was due on {{dueDate}}. Please ignore if already paid. 🙏",
@@ -99,7 +99,7 @@ export const TEMPLATE_DEFINITIONS: TemplateDefinition[] = [
   {
     key: "payment_reminder_firm",
     name: "Payment reminder: firm",
-    when: "When you click to send a firm reminder. Never sent by itself. Used from Phase 7.",
+    when: "When you click to send a firm reminder. Never sent by itself.",
     subject: "Payment overdue: invoice {{invoiceNumber}}",
     body: "Dear {{contactName}},\n\nInvoice {{invoiceNumber}} for {{amount}} is now overdue since {{dueDate}}. Kindly arrange the payment at the earliest.\n\nRegards,\n{{agencyName}}",
     whatsapp: "Hello {{contactName}}, invoice {{invoiceNumber}} ({{amount}}) is overdue since {{dueDate}}. Kindly arrange payment at the earliest.",
@@ -108,7 +108,7 @@ export const TEMPLATE_DEFINITIONS: TemplateDefinition[] = [
   {
     key: "payment_reminder_final",
     name: "Payment reminder: final",
-    when: "When you click to send a final reminder. Never sent by itself. Used from Phase 7.",
+    when: "When you click to send a final reminder. Never sent by itself.",
     subject: "Final reminder: invoice {{invoiceNumber}}",
     body: "Dear {{contactName}},\n\nDespite earlier reminders, invoice {{invoiceNumber}} for {{amount}} remains unpaid. Please clear the dues within 3 days to avoid interruption of services.\n\nRegards,\n{{agencyName}}",
     whatsapp: "Hello {{contactName}}, final reminder for invoice {{invoiceNumber}} ({{amount}}). Please clear within 3 days to avoid service interruption.",

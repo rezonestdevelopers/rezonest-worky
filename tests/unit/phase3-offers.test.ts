@@ -168,11 +168,14 @@ describe("the printed offer", () => {
     expect(row(doc, "Round-off")).toBe("₹0.01");
     expect(doc.grandTotal).toBe("₹1,062.00");
   });
-  it("milestones always add up to the total", () => {
-    const doc = buildOfferDocument(docInput({ milestones: [{ name: "A", percent: "33.33" }, { name: "B", percent: "33.33" }, { name: "C", percent: "33.34" }] }));
+  it("milestones always add up to the one-time work, before GST", () => {
+    const doc = buildOfferDocument(docInput({
+      items: [{ description: "Website", billingType: "MILESTONE", quantity: 1, unit: "project", rate: "25000", gstRate: 18 }],
+      milestones: [{ name: "A", percent: "33.33" }, { name: "B", percent: "33.33" }, { name: "C", percent: "33.34" }],
+    }));
     const cents = doc.milestones.map((m) => Math.round(Number(m.amount.replace(/[₹,]/g, "")) * 100));
-    expect(cents.reduce((a, b) => a + b, 0)).toBe(2950000);
-    expect(doc.milestones[0].amount).toBe("₹9,832.35");
+    expect(cents.reduce((a, b) => a + b, 0)).toBe(2500000);
+    expect(doc.milestones[0].amount).toBe("₹8,332.50");
   });
   it("shows package, months and SAC; explains monthly totals", () => {
     const doc = buildOfferDocument(docInput({

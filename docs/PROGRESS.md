@@ -120,7 +120,6 @@ See `docs/DECISIONS.md` → D-09.
 
 ### Known issues / limitations
 - Totals on retainer offers are for one month. Duration is shown but isn't multiplied (D-23).
-- Milestone percentages apply to the whole total, including one month of any retainer in the offer.
 - Email templates can't be edited on screen until Phase 6. Sent emails go to the console until SMTP is set.
 - Changing `AUTH_SECRET` makes existing client links stop working (D-22).
 - Rate limits live in server memory, so they're per server.
@@ -226,9 +225,42 @@ See `docs/DECISIONS.md` → D-09.
   `C:\Users\rezon\rezonest-postgres\start-database.cmd` before starting the app. The live version won't have this.
 - Without the scheduled job, the digest only goes out when someone opens the app after the digest time.
 - Digests are plain text.
-- Invoices and payments are sample data until Phase 7, so payment reminders link to pages that don't exist yet.
 - Marking a reminder done hides it until you reopen it, even if the task stays overdue. A change of due date
   on a task that was due today or soon makes a new reminder.
 - The dashboard's alerts panel works from live data and doesn't show "due soon" tasks, as in the brief's panel list. The reminders page does.
 
-## Phase 7: GST invoices, payments, TDS, ledger and ageing ⏳ (not started)
+## Phase 7: GST invoices, payments, TDS, ledger and ageing ✅ (05 Nov 2026)
+
+### Done
+- **Invoices**: tax and proforma, from a blank form, a project's one-time work, a milestone, a retainer month,
+  a renewal or approved change requests. CGST + SGST or IGST is decided from the client's state, GST rate is editable
+  per line, GST can be switched off, and clients outside India are treated as export.
+- **Locked once issued**: number given at issue, details frozen, edit refused. Corrections are by credit note or
+  cancelling with a reason. A draft can be discarded; it never had a number, so none is lost.
+- **Issue checks**: a GST tax invoice can't be issued without your GSTIN and a SAC code on every line. Drafts still save,
+  and the draft says exactly what's missing.
+- **Credit notes**: line by line, at each line's GST rate, with their own number and PDF.
+- **Proforma**: converts to a tax invoice with its own number. An advance on a client with an open proforma
+  prompts to convert it, dated the day the money came, and apply the money.
+- **PDF, email, WhatsApp**: branded PDF with bank details, UPI QR for the balance and signature. Screen and PDF
+  come from the same figures.
+- **Payments**: split across invoices, TDS with section, advances, applying advances later, removing from an invoice,
+  voiding with a reason, and a warning on a repeated reference and amount.
+- **Payment reminders**: polite, firm or final, by email or WhatsApp, with a preview. Sent only when you click, and logged.
+- **Statement of account** on screen and as a PDF, and an **ageing report** with Excel.
+- **Daily job**: drafts each retainer's month on its day and each renewal 30 days before expiry, tells you, and
+  marks invoices overdue. Always drafts: nothing is issued or sent by itself.
+- **Milestones** now mean a share of the one-time work before GST, on projects, offers and PDFs.
+- **Lists**: invoices and payments with search, filters, sorting, paging and Excel. Client tabs link through.
+- **Tests**: 503 unit + integration tests (83 new), 59 end-to-end browser tests (9 new). All passing.
+
+### Known issues / limitations
+- Your GSTIN, bank details and SAC codes are empty until you fill them in, so GST tax invoices stay blocked until then.
+- Please confirm with your CA: GST on advances (D-62), and whether the SAC and credit note formats suit your filing.
+- A paid invoice can't take a credit note until its payment is removed from it. There's no record of refunds yet.
+- Emails only leave the computer once SMTP is set in `.env`. Until then they print in the server window.
+- Offers made before this phase show the new milestone amounts when opened. Milestones already saved on sample projects
+  keep their stored amounts until edited. The invoice is always worked out fresh from the offer's items.
+- The invoice lists and dashboard count sample invoices until you run the wipe command.
+
+## Phase 8: Expenses & profitability, documents, communication log ⏳ (not started)

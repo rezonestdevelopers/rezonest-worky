@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Archive, ArchiveRestore, Receipt } from "lucide-react";
+import { Archive, ArchiveRestore } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmButton } from "@/components/shared/confirm-button";
 import { PageHeader } from "@/components/shared/page-header";
@@ -15,6 +14,7 @@ import { assetKindLabel, oneYearAfter, renewalMargin, renewalUrgency } from "@/l
 import { setAssetArchivedAction } from "@/server/actions/delivery";
 import { getAsset } from "@/server/queries/renewals";
 import { AssetForm } from "../asset-form";
+import { OpenDraftButton } from "@/app/(app)/invoices/open-draft-button";
 import { RenewButton } from "./renew-button";
 
 export const metadata: Metadata = { title: "Renewal item" };
@@ -64,8 +64,7 @@ export default async function AssetPage({ params }: { params: Promise<{ id: stri
             <div className="text-xs text-muted-foreground">Our cost {formatINR(a.costPrice)}, renewal price {formatINR(a.renewalPrice)}</div>
           </div>
           <div className="flex flex-col items-end gap-1">
-            <Button variant="outline" size="sm" disabled><Receipt /> Create renewal invoice</Button>
-            <span className="text-xs text-muted-foreground">Arrives with invoices in Phase 7.</span>
+            <OpenDraftButton kind="renewal" id={a.id} label="Create renewal invoice" />
           </div>
         </CardContent>
       </Card>

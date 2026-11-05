@@ -255,7 +255,7 @@ test.describe("Phase 5: content, ads, renewals", () => {
     await expect(page).toHaveURL(/\/renewals\/[a-z0-9]{20,}$/);
     await expect(page.getByText("Expires today")).toBeVisible();
     await expect(page.getByTestId("asset-margin")).toContainText("₹401.00 (33.4%)");
-    await expect(page.getByRole("button", { name: "Create renewal invoice" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Create renewal invoice" })).toBeEnabled();
 
     await page.getByRole("button", { name: "Mark renewed" }).click();
     await page.getByRole("button", { name: "Save new date" }).click();

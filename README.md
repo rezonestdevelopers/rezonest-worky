@@ -3,7 +3,7 @@
 Internal agency management system for **Rezonest Digital & Services**, Bhosari, Pune.
 Leads → offers → projects → tasks → GST invoices → payments, all in one place.
 
-> Status: **Phase 6 done** (reminder engine, notification bell, daily email digests, editable email templates).
+> Status: **Phase 7 done** (GST invoices, proforma, credit notes, UPI QR, payments, TDS, advances, payment reminders, statement of account, ageing).
 > See [`docs/PROGRESS.md`](docs/PROGRESS.md) for what's built and what's next.
 
 ---
@@ -106,7 +106,7 @@ Call this one every hour:
 curl -H "Authorization: Bearer YOUR_CRON_SECRET" https://your-app/api/cron/reminders
 ```
 
-On Vercel, add them under Cron Jobs. On a VPS, add them to cron. The first moves offers past their validity to Expired. The second creates each retainer's monthly deliverables and tasks once their day has come, renews retainers set to auto-renew, and refreshes project health. The hourly one updates reminders, then sends the daily digest on its first run after the digest time set in Settings. Running any of them twice is safe, and a digest goes only once a day.
+On Vercel, add them under Cron Jobs. On a VPS, add them to cron. The first moves offers past their validity to Expired. The second creates each retainer's monthly deliverables and tasks once their day has come, renews retainers set to auto-renew, refreshes project health, drafts retainer and renewal invoices for your review, and marks unpaid invoices overdue. The hourly one updates reminders, then sends the daily digest on its first run after the digest time set in Settings. Running any of them twice is safe, and a digest goes only once a day.
 
 **Keep `AUTH_SECRET` and `APP_URL` correct when going live.** Client offer links are built from them, so changing `AUTH_SECRET` later stops existing links working.
 
@@ -138,6 +138,7 @@ pg_restore --clean --no-owner --dbname "$DATABASE_URL" rezonest-2026-11-02.dump
 ## 6. How do I…
 
 - **Change GST rate, payment terms or reminder rules?** Settings → *Defaults & Reminders*.
+- **Before your first GST invoice:** fill in GSTIN, bank and UPI under Settings → *GST & Bank*, and SAC codes under Settings → *Service catalogue*. Each GST tax invoice needs a SAC code on every line.
 - **Change invoice / quotation number format?** Settings → *Numbering*. Use `{FY}` and `{SEQ}`.
   Numbers restart each 1 April and are never reused. Changes affect future documents only.
 - **Change the brand colour?** Settings → *Branding*, or edit `--brand` in `src/app/globals.css`.

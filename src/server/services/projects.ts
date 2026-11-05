@@ -7,6 +7,8 @@ import { changeRequestSchema, milestoneSchema, projectSchema, targetProgressSche
 import { labelForFormat, planBackward, planForward, renewedEnd, spreadDates, templateNameForFormat, toWorkingDay, unitSets, type PlanStep, type PlannedTask } from "@/lib/work-plan";
 import type { z } from "zod";
 import { ensureOfferOnboarding } from "./onboarding";
+import { milestoneAmount, milestoneBase } from "@/lib/invoice-rules";
+import { runInvoiceJob } from "./invoices";
 import { BusinessError, diffChanges, logActivity, type Db, type Tx } from "./shared";
 
 const asKey = (d: Date | null | undefined) => (d ? dateOnlyKey(d) : null);
@@ -170,7 +172,7 @@ export async function convertOfferToProject(db: Db, data: ConvertOfferData, acto
               name: m.name,
               dueDate: toDate(m.dueDate),
               paymentPercent: m.paymentPercent,
-              amount: m.paymentPercent ? toDecimal(offer.grandTotal).times(m.paymentPercent).dividedBy(100).toDecimalPlaces(2).toFixed(2) : null,
+              amount: m.paymentPercent ? milestoneAmount(milestoneBase(offer.items), m.paymentPercent).toFixed(2) : null,
               sortOrder,
             })),
           },
@@ -292,7 +294,8 @@ export async function runDailyWork(db: Db, today = todayKey()) {
     }
     await refreshProject(db, p.id, today);
   }
-  return { projects: projects.length, renewed, monthsCreated };
+  const invoices = await runInvoiceJob(db, today);
+  return { projects: projects.length, renewed, monthsCreated, invoiceDrafts: invoices.drafts, overdueInvoices: invoices.overdue };
 }
 
 let lastRun = 0;
@@ -344,7 +347,7 @@ export async function createRetainerMonthNow(db: Db, projectId: string, month: s
 
 export async function saveMilestone(db: Db, data: z.output<typeof milestoneSchema>, actorId: string) {
   await db.$transaction(async (tx) => {
-    const project = await tx.project.findUnique({ where: { id: data.projectId }, include: { offer: { select: { grandTotal: true } } } });
+    const project = await tx.project.findUnique({ where: { id: data.projectId }, include: { offer: { select: { items: { select: { billingType: true, taxableValue: true } } } } } });
     if (!project) throw new BusinessError("This project no longer exists.");
     const others = await tx.milestone.findMany({ where: { projectId: project.id, ...(data.id ? { id: { not: data.id } } : {}) }, select: { paymentPercent: true } });
     const percent = others.reduce((s, m) => s.plus(toDecimal(m.paymentPercent)), toDecimal(data.paymentPercent));
@@ -353,7 +356,7 @@ export async function saveMilestone(db: Db, data: z.output<typeof milestoneSchem
       name: data.name,
       dueDate: toDate(data.dueDate),
       paymentPercent: data.paymentPercent,
-      amount: data.paymentPercent && project.offer ? toDecimal(project.offer.grandTotal).times(data.paymentPercent).dividedBy(100).toDecimalPlaces(2).toFixed(2) : null,
+      amount: data.paymentPercent && project.offer ? milestoneAmount(milestoneBase(project.offer.items), data.paymentPercent).toFixed(2) : null,
       status: data.completed ? ("COMPLETED" as const) : ("PENDING" as const),
       completedAt: data.completed ? new Date() : null,
     };

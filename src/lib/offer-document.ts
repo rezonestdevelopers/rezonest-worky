@@ -72,10 +72,12 @@ export function buildOfferDocument(input: OfferDocInput) {
     };
   });
 
-  // Each milestone is rounded to paise. The last takes what's left, so they always add up to the total.
+  // A share of the one-time work before GST: retainers bill monthly on their own. Each is rounded
+  // to paise, and the last takes what's left, so they always add up to that work's value.
+  const milestoneTotal = input.items.reduce((acc, item, i) => (item.billingType === "MONTHLY_RETAINER" ? acc : acc.plus(totals.lines[i].taxable)), toDecimal(0));
   let allocated = toDecimal(0);
   const milestones = input.milestones.map((m, i) => {
-    const amount = i === input.milestones.length - 1 ? totals.grandTotal.minus(allocated) : round2(totals.grandTotal.times(toDecimal(m.percent)).dividedBy(100));
+    const amount = i === input.milestones.length - 1 ? milestoneTotal.minus(allocated) : round2(milestoneTotal.times(toDecimal(m.percent)).dividedBy(100));
     allocated = allocated.plus(amount);
     return { name: m.name, percent: `${toDecimal(m.percent).toString()}%`, amount: formatINR(amount) };
   });

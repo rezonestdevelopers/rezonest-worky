@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
     }),
     finance
       ? db.invoice.findMany({
-          where: { OR: [{ number: contains }, { client: { companyName: contains } }] },
+          where: { NOT: { status: "CANCELLED", number: null }, OR: [{ number: contains }, { client: { companyName: contains } }] },
           select: { id: true, number: true, grandTotal: true, paymentStatus: true, status: true, client: { select: { companyName: true } } },
           orderBy: { invoiceDate: "desc" },
           take,

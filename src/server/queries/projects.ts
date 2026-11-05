@@ -110,7 +110,7 @@ export async function getProjectOverview(projectId: string, viewer: Viewer) {
 }
 
 export const getProjectMilestones = (projectId: string) =>
-  db.milestone.findMany({ where: { projectId }, orderBy: { sortOrder: "asc" }, include: { _count: { select: { tasks: { where: { archivedAt: null, status: { not: "DONE" } } } } } } });
+  db.milestone.findMany({ where: { projectId }, orderBy: { sortOrder: "asc" }, include: { invoices: { where: { status: { not: "CANCELLED" } }, select: { id: true, number: true }, take: 1 }, _count: { select: { tasks: { where: { archivedAt: null, status: { not: "DONE" } } } } } } });
 
 export const getProjectTargets = (projectId: string) =>
   db.target.findMany({ where: { projectId }, orderBy: { sortOrder: "asc" }, include: { progress: { orderBy: { month: "desc" }, take: 6 } } });

@@ -85,6 +85,13 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  await db.invoiceRun.deleteMany();
+  await db.paymentAllocation.deleteMany();
+  await db.payment.deleteMany();
+  await db.creditNote.deleteMany();
+  await db.invoiceItem.deleteMany();
+  await db.invoice.updateMany({ data: { convertedFromId: null } });
+  await db.invoice.deleteMany();
   await db.notification.deleteMany();
   await db.contentApproval.deleteMany();
   await db.contentCalendarItem.deleteMany();

@@ -7,6 +7,7 @@ import { dateOnlyKey, formatDateKey, formatDateTime } from "@/lib/dates";
 import { formatINR } from "@/lib/money/format";
 import { sum } from "@/lib/money/decimal";
 import { effectiveHealth } from "@/lib/health";
+import { paymentModeLabel } from "@/lib/invoice-rules";
 import { humanize } from "@/lib/status";
 import { clientTabQueries } from "@/server/queries/clients";
 
@@ -165,28 +166,39 @@ export async function ClientTab({ tab, clientId, showMoney }: { tab: string; cli
     case "invoices": {
       const rows = await clientTabQueries.invoices(clientId);
       return (
+        <div className="space-y-3">
+        <div className="flex flex-wrap justify-end gap-4">
+          <Link href={`/clients/${clientId}/statement`} className="text-sm font-medium underline-offset-4 hover:underline">Statement of account</Link>
+          <Link href={`/invoices/new?client=${clientId}`} className="text-sm font-medium underline-offset-4 hover:underline">New invoice</Link>
+        </div>
         <TabTable
-          section="invoices" phase={7} empty="No invoices yet"
+          section="invoices" empty="No invoices yet"
           columns={["Number", "Type", "Status", "Payment", "Date", "Due", "Total", "Balance"]}
           rows={rows.map((i) => ({
             key: i.id,
             cells: [
-              i.number ?? "Draft", humanize(i.type), <StatusBadge key="s" kind="invoice" value={i.status} />,
+              <Link key="n" href={`/invoices/${i.id}`} className="font-medium whitespace-nowrap hover:underline">{i.number ?? "Draft"}</Link>, humanize(i.type), <StatusBadge key="s" kind="invoice" value={i.status} />,
               i.status === "ISSUED" ? <StatusBadge key="p" kind="payment" value={i.paymentStatus} /> : "—",
               formatDateKey(i.invoiceDate), formatDateKey(i.dueDate), amount(i.grandTotal), amount(i.balanceDue),
             ],
           }))}
         />
+        </div>
       );
     }
     case "payments": {
       const rows = await clientTabQueries.payments(clientId);
       return (
+        <div className="space-y-3">
+        <div className="flex justify-end">
+          <Link href={`/payments/new?client=${clientId}`} className="text-sm font-medium underline-offset-4 hover:underline">Record a payment</Link>
+        </div>
         <TabTable
-          section="payments" phase={7} empty="No payments yet"
+          section="payments" empty="No payments yet"
           columns={["Date", "Amount received", "TDS", "Mode", "Reference"]}
-          rows={rows.map((p) => ({ key: p.id, cells: [formatDateKey(p.date), amount(p.amount), amount(p.tdsAmount), humanize(p.mode), p.reference ?? "—"] }))}
+          rows={rows.map((p) => ({ key: p.id, cells: [<Link key="d" href={`/payments/${p.id}`} className="font-medium whitespace-nowrap hover:underline">{formatDateKey(p.date)}</Link>, amount(p.amount), amount(p.tdsAmount), paymentModeLabel(p.mode), p.reference ?? "—"] }))}
         />
+        </div>
       );
     }
     case "expenses": {
