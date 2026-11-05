@@ -9,6 +9,8 @@ const LINKS = [
   { href: "/settings/services", label: "Service catalogue" },
   { href: "/settings/lists", label: "Sectors, sources & departments" },
   { href: "/settings/emails", label: "Email templates" },
+  { href: "/settings/data", label: "Data export" },
+  { href: "/settings/backups", label: "Backups" },
 ];
 
 export function SettingsNav() {

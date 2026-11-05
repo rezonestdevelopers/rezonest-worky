@@ -284,4 +284,30 @@ See `docs/DECISIONS.md` → D-09.
 - A project's revenue only counts invoices linked to that project. Blank invoices with no project count for the client only.
 - Files are stored on this PC in the `storage` folder until cloud storage is set for going live.
 
-## Phase 9: Reports, GST summary, data export, backups ⏳ (not started)
+## Phase 9: Reports, GST summary, data export, backups ✅ (05 Nov 2026)
+
+### Done
+- **Agency report**: revenue by month, service, sector and lead source, offer conversion, MRR trend, outstanding and
+  ageing, team workload and on-time %, renewals calendar, profit by client and by service. Choose the dates.
+- **GST summary**: output tax by month for your CA, with SAC-wise totals and every tax invoice and credit note, by financial year.
+- **Client report (internal)**: profile, offers and status history, projects, services, targets vs actual, deliverables,
+  task timeline with delays, change requests, ad results, invoices, payments, TDS, outstanding, expenses and profit.
+- **Monthly report for a client**: deliverables, KPIs, SEO rankings, ad results, content published, and your highlights and
+  next month's plan. Branded, with no fees, costs or team names. Email it with the PDF attached.
+- **PDF and Excel**: every report. The screen, PDF and Excel come from the same figures.
+- **Data export**: Settings → Data export, any table as Excel or CSV, or everything in one Excel file. Each download is logged.
+- **Backups**: one a day, keeping 30 days, with a list, Back up now and download under Settings → Backups. A failure tells you and retries.
+- **Tightened**: the general file address now only serves public files and, for admins, the signature image.
+- **Tests**: 606 unit + integration tests (55 new), 76 end-to-end browser tests (10 new, 1 retired with the last placeholder). A real backup was restored into a scratch database and compared.
+
+### Known issues / limitations
+- Backups on this PC are on this PC. Download a copy now and then until cloud storage is set up at go-live.
+- With no scheduled job on this PC, the day's backup starts when someone opens the dashboard.
+- Uploaded files aren't in the database backup. Copy the `storage` folder as well.
+- Backups don't run on Vercel, which has no `pg_dump`. Use the managed database's own backups there.
+- The MRR trend uses retainers active today, so one that's ended or been paused isn't counted in past months.
+- Ad results count an entry in the month its period starts, so one spanning two months shows in the first.
+- Reports are for admins only, for now. Phase 10 reviews what Managers should see.
+- Please have your CA check the GST summary before you rely on it for filing.
+
+## Phase 10: Employee portal, PWA, performance and security review, deployment ⏳ (not started)

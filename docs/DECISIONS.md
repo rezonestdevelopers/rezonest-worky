@@ -411,3 +411,39 @@ The upload limit went from 5 MB to 20 MB for documents and bills. Task attachmen
 They gained an archived date, so a mistaken entry can be hidden without being deleted, and its reminder closes. Editing doesn't
 move an entry to another client or lead. A next action needs a date and vice versa, or the reminder could never fire. Reminders
 only appear on the date, and look back 14 days, as set in Phase 6.
+
+### D-75 A credit note reduces GST in its own month (owner's decision)
+The GST summary takes a credit note off the month it's raised in, not its invoice's month, so a closed month never changes.
+This matches how revenue is counted (D-09). Credit notes have their own columns, and each is listed, so a CA can treat them
+differently if needed. Round-off isn't tax, so it's left out. Invoices with no GST show as their own value.
+
+### D-76 The client's report shows their ad spend, never your fee (owner's decision)
+Ad spend is the client's own budget, so spend, cost per lead and ROAS are shown. Nothing else with a rupee value is. The report
+reads only what it may show, with no fee, cost or team name ever fetched, and a test checks none of them appear in it.
+A target measured in rupees, such as cost per lead, still shows, since it's a result.
+
+### D-77 Reports are one structure, shown three ways
+A report is a list of sections with typed columns. The screen, the PDF and Excel all draw from it, so they can't disagree.
+Excel gets real numbers it can add up, one sheet per section.
+
+### D-78 Profit by service doesn't guess
+Revenue comes from invoice lines, with credit notes shared across their invoice's lines as on the dashboard. An expense counts
+against a service only when its project has just that one service. The rest is stated as a figure rather than split.
+
+### D-79 What the data export leaves out
+Password hashes, password reset tokens, client link records and the app's internal markers. It works from an allowed list, so a
+new table stays out until added. CSV cells that would run as a formula in Excel are marked as text. Every download is logged.
+
+### D-80 Backups
+One a day, however often the job runs. Files have random names. Old copies are removed only after that day's backup succeeds, so
+repeated failures can't use up your backups. The database password reaches `pg_dump` through its environment, never its command
+line. With `BACKUP_AUTO="true"`, as on this PC with no scheduler, opening the dashboard starts the day's backup. Only someone
+who can manage settings can download one.
+
+### D-81 The general file address is restricted
+`/api/files` used to serve any private file to anyone logged in who knew its name. Names are random, so this wasn't easy to reach,
+but it went around the checks on bills and documents. It now serves only public files and, for admins, the signature image.
+Private files use addresses that check who's asking.
+
+### D-82 Monthly reports default to last month
+That's the month that's finished. You can choose any month up to the current one. Your highlights and plan are stored per client and month.

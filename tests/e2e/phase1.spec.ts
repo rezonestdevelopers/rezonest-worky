@@ -89,10 +89,4 @@ test.describe("Phase 1 — auth, dashboard, settings, search", () => {
     await page.getByRole("button", { name: "Save settings" }).click();
     await expect(page.getByText(/Saved \d+ change/)).toBeVisible();
   });
-
-  test("unbuilt sections show a phase placeholder", async ({ page }) => {
-    await login(page);
-    await page.goto("/reports");
-    await expect(page.getByText(/coming in Phase 9/)).toBeVisible();
-  });
 });

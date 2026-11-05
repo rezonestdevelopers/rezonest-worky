@@ -3,7 +3,7 @@
 Internal agency management system for **Rezonest Digital & Services**, Bhosari, Pune.
 Leads → offers → projects → tasks → GST invoices → payments, all in one place.
 
-> Status: **Phase 8 done** (expenses and bills, profit per client and project, client documents, communication log).
+> Status: **Phase 9 done** (agency, client and monthly reports as PDF and Excel, GST summary, data export, daily backups).
 > See [`docs/PROGRESS.md`](docs/PROGRESS.md) for what's built and what's next.
 
 ---
@@ -117,23 +117,38 @@ On Vercel, add them under Cron Jobs. On a VPS, add them to cron. The first moves
 2. Build command: `pnpm db:deploy && pnpm build`.
 3. Run once: `pnpm db:seed --no-sample` (creates settings, services and your admin login).
 
-**Option B: VPS with Docker** (e.g. AWS Lightsail Mumbai). A Dockerfile and backup cron arrive in Phase 9/10.
+**Option B: VPS with Docker** (e.g. AWS Lightsail Mumbai). A Dockerfile arrives in Phase 10.
 
 Before going live: `pnpm db:wipe-sample`, then set your real GSTIN, bank and UPI details in **Settings**.
 
 ## 5. Backups & restore
 
-Automated daily backups (pg_dump → storage, 30 days kept) are built in Phase 9. Until then, a manual backup:
+The app backs up the whole database once a day with `pg_dump`, saves it to file storage, and keeps the last 30 days. Settings → **Backups** shows each one, with **Back up now** and a download. If a backup fails, you get a notification and it tries again.
+
+To run it daily, call `/api/cron/backup` with your `CRON_SECRET`, the same way as the other jobs, or set `BACKUP_AUTO="true"` in `.env` so opening the dashboard starts the day's backup. The machine needs `pg_dump`: set `PG_DUMP_PATH` in `.env` if it isn't on the PATH. Vercel doesn't have `pg_dump`, so there, use your managed database's own daily backups instead.
+
+**Backups on this computer won't survive if it fails.** Download a copy now and then, or use cloud storage (`STORAGE_DRIVER="s3"`).
+
+### Restoring a backup
+
+Restoring replaces everything in the database you point it at, so try it on a new, empty database first.
+
+1. Stop the app.
+2. Download the backup from Settings → Backups, or find it in `storage/private/backups`.
+3. Create an empty database, then restore into it:
 
 ```bash
-pg_dump "$DATABASE_URL" --format=custom --file=rezonest-$(date +%F).dump
+createdb -h localhost -U rezonest rezonest_restored
+pg_restore --no-owner -h localhost -U rezonest --dbname rezonest_restored rezonest-2026-11-05.dump
 ```
 
-Restore into an empty database:
+4. Check it looks right, then point `DATABASE_URL` in `.env` at the restored database and start the app.
 
-```bash
-pg_restore --clean --no-owner --dbname "$DATABASE_URL" rezonest-2026-11-02.dump
-```
+Uploaded files aren't in the database. They're in `storage` or your cloud bucket, so back those up as well.
+
+## Data export
+
+Settings → **Data export** downloads any table as Excel or CSV, or everything as one Excel file. Password hashes and security tokens are never included.
 
 ## 6. How do I…
 

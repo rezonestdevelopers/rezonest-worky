@@ -79,6 +79,15 @@ export const TEMPLATE_DEFINITIONS: TemplateDefinition[] = [
     placeholders: { name: "Priya", resetLink: "https://example.com/reset-password?token=…" },
   },
   {
+    key: "monthly_report",
+    name: "Monthly report for a client",
+    when: "When you email a client their monthly performance report. The PDF goes with it.",
+    subject: "{{month}} performance report: {{clientName}}",
+    body: "Dear {{contactName}},\n\nPlease find attached your performance report for {{month}}.\n\nDo tell us if you'd like to go through it together.\n\nWarm regards,\n{{agencyName}}",
+    whatsapp: null,
+    placeholders: { contactName: "Asha Patil", clientName: "Asha Foods", month: "Oct 2026", agencyName: "Rezonest Digital & Services" },
+  },
+  {
     key: "invoice_send",
     name: "Send invoice",
     when: "When you send an invoice.",

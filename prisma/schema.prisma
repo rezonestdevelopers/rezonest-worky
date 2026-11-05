@@ -569,6 +569,8 @@ model Client {
   onboarding      OnboardingChecklist[]
   changeRequests  ChangeRequest[]
 
+  reportNotes ClientReportNote[]
+
   @@index([status])
   @@index([sectorId])
   @@index([leadSourceId])
@@ -1379,6 +1381,35 @@ model Document {
   @@index([clientId])
   @@index([projectId])
   @@index([taskId])
+}
+
+/// The words you add to a client's monthly report.
+model ClientReportNote {
+  id          String   @id @default(cuid())
+  clientId    String
+  month       String   // "2026-11"
+  highlights  String?
+  nextPlan    String?
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, month])
+}
+
+/// One a day. The file itself is in storage.
+model BackupRun {
+  id         String    @id @default(cuid())
+  day        String    @unique // "2026-11-05"
+  status     String    // RUNNING | DONE | FAILED
+  storageKey String?
+  sizeBytes  Int?
+  error      String?
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }
 
 model CommunicationLog {

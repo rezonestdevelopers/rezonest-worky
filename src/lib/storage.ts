@@ -1,13 +1,13 @@
 import "server-only";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 /**
  * File storage. STORAGE_DRIVER=local (dev: ./storage folder) or s3
  * (AWS S3 Mumbai / Cloudflare R2 via S3_ENDPOINT). Keys starting with
- * "public/" may be served without login (logo on public offer pages);
- * everything else requires a logged-in user.
+ * "public/" may be served without login (logo on public offer pages). Private files have
+ * their own addresses that check who's asking; see /api/files for the one exception.
  */
 const LOCAL_ROOT = path.join(process.cwd(), "storage");
 
@@ -46,6 +46,15 @@ export async function getFile(key: string): Promise<Buffer | null> {
   } catch {
     return null;
   }
+}
+
+export async function removeFile(key: string): Promise<void> {
+  if (!isSafeKey(key)) throw new Error("Invalid storage key");
+  if (process.env.STORAGE_DRIVER === "s3") {
+    await s3().send(new DeleteObjectCommand({ Bucket: process.env.S3_BUCKET, Key: key }));
+    return;
+  }
+  await fs.rm(path.join(LOCAL_ROOT, key), { force: true });
 }
 
 export function fileUrl(key: string | null | undefined): string | null {

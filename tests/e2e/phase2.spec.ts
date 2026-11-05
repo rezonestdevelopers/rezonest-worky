@@ -182,7 +182,7 @@ test.describe("Phase 2: clients", () => {
       ["Ads", "Client's budget"],
       ["Invoices", /REZ\/INV\//],
       ["Payments", "Amount received"],
-      ["Reports", "Client reports arrive in Phase 9"],
+      ["Reports", "Monthly report for the client"],
       ["Communication Log", "Reminded about 2 pending invoices"],
     ] as const) {
       await page.getByRole("navigation", { name: "Client sections" }).getByRole("link", { name: tab, exact: true }).click();
