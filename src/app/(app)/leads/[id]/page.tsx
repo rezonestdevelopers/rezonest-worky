@@ -3,11 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Archive } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CommunicationPanel } from "@/components/shared/communication-panel";
 import { ContactLinks } from "@/components/shared/contact-links";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { requirePermission } from "@/lib/auth-guard";
-import { dateOnlyKey, formatDateKey, formatDateTime, todayKey } from "@/lib/dates";
+import { dateOnlyKey, formatDateKey, formatDateTime, istDateKey, todayKey } from "@/lib/dates";
 import { db } from "@/lib/db";
 import { formatINR } from "@/lib/money/format";
 import { statusDef } from "@/lib/status";
@@ -125,6 +126,11 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
               </ol>
             </CardContent>
           </Card>
+          <CommunicationPanel
+            leadId={lead.id}
+            today={todayKey()}
+            rows={lead.communications.map((c) => ({ id: c.id, type: c.type, date: istDateKey(c.date), summary: c.summary, nextAction: c.nextAction, nextActionDate: c.nextActionDate ? dateOnlyKey(c.nextActionDate) : null }))}
+          />
           <Card>
             <CardHeader><CardTitle>Offers</CardTitle></CardHeader>
             <CardContent>

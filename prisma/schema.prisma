@@ -1392,6 +1392,7 @@ model CommunicationLog {
   nextActionDate DateTime?         @db.Date
   createdById    String?
   createdAt      DateTime          @default(now())
+  archivedAt     DateTime?
 
   client Client? @relation(fields: [clientId], references: [id])
   lead   Lead?   @relation(fields: [leadId], references: [id])

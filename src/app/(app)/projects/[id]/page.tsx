@@ -35,6 +35,7 @@ import {
 import { getTaskList } from "@/server/queries/tasks";
 import { refreshProject } from "@/server/services/projects";
 import { loadViewer, type Viewer } from "@/server/services/tasks";
+import { profitFor } from "@/server/services/profit";
 import { OpenDraftButton } from "@/app/(app)/invoices/open-draft-button";
 import { ChangeRequestsPanel, MilestonesPanel, RetainerMonthButton, TargetsPanel } from "./project-panels";
 
@@ -142,10 +143,22 @@ async function Overview({ project, viewer, showMoney, canManage }: { project: He
   const o = await getProjectOverview(project.id, viewer);
   const items = project.onboarding?.items ?? [];
   const onboardingDone = items.filter((i) => i.isDone).length;
+  const profit = showMoney ? await profitFor(db, { from: null, to: todayKey(), projectId: project.id }) : null;
   return (
     <div className="space-y-4">
-      {showMoney && project.services.some((s) => s.billingType !== "MONTHLY_RETAINER") && (
-        <div className="flex justify-end"><OpenDraftButton kind="project" id={project.id} label="Invoice one-time work" /></div>
+      {showMoney && (
+        <div className="flex flex-wrap justify-end gap-2">
+          <Button variant="outline" size="sm" asChild><Link href={`/expenses/new?project=${project.id}`}><Plus /> Add expense</Link></Button>
+          {project.services.some((s) => s.billingType !== "MONTHLY_RETAINER") && <OpenDraftButton kind="project" id={project.id} label="Invoice one-time work" />}
+        </div>
+      )}
+      {profit && (
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4" data-testid="project-profit">
+          <Stat label="Revenue before GST" value={formatINR(profit.revenue, { decimals: false })} />
+          <Stat label="Expenses" value={formatINR(profit.expenses, { decimals: false })} />
+          <Stat label="Team time" value={formatINR(profit.time, { decimals: false })} />
+          <Stat label="Profit" value={formatINR(profit.profit, { decimals: false })} tone={profit.profit.isNegative() ? "text-tone-red" : undefined} />
+        </div>
       )}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         <Stat label="Progress" value={`${project.progressPercent}%`} />

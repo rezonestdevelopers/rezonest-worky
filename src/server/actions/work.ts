@@ -8,7 +8,8 @@ import { invalid, type ActionResult } from "@/lib/action-result";
 import { db } from "@/lib/db";
 import { renderTemplate } from "@/lib/email-templates";
 import { sendMail } from "@/lib/mailer";
-import { putFile, sniffImage } from "@/lib/storage";
+import { documentType, NOT_ALLOWED_FILE } from "@/lib/file-types";
+import { putFile } from "@/lib/storage";
 import {
   bulkTaskSchema,
   changeRequestSchema,
@@ -296,17 +297,6 @@ export async function setTaskArchivedAction(id: string, archived: boolean): Prom
 }
 
 const ATTACH_MAX = 5 * 1024 * 1024;
-const OFFICE = /\.(docx|xlsx|pptx)$/i;
-
-/** Real file type is checked from its contents, not its name. Files are only ever served as downloads. */
-function attachmentType(buf: Buffer, name: string): { ext: string; mime: string } | null {
-  const image = sniffImage(buf);
-  if (image) return { ext: image, mime: image === "jpg" ? "image/jpeg" : `image/${image}` };
-  if (buf.subarray(0, 5).toString() === "%PDF-") return { ext: "pdf", mime: "application/pdf" };
-  if (buf.subarray(0, 2).toString() === "PK" && OFFICE.test(name)) return { ext: name.split(".").pop()!.toLowerCase(), mime: "application/octet-stream" };
-  return null;
-}
-
 export async function uploadTaskFileAction(formData: FormData): Promise<ActionResult> {
   return runAction("work.own", async (user) => {
     const taskId = String(formData.get("taskId") ?? "");
@@ -314,8 +304,8 @@ export async function uploadTaskFileAction(formData: FormData): Promise<ActionRe
     if (!(file instanceof File) || file.size === 0) return { ok: false, error: "Please choose a file." };
     if (file.size > ATTACH_MAX) return { ok: false, error: "Files must be 5 MB or smaller." };
     const buf = Buffer.from(await file.arrayBuffer());
-    const type = attachmentType(buf, file.name);
-    if (!type) return { ok: false, error: "Only images, PDF, Word, Excel and PowerPoint files are allowed." };
+    const type = documentType(buf, file.name);
+    if (!type) return { ok: false, error: NOT_ALLOWED_FILE };
     const viewer = await loadViewer(db, user);
     const storageKey = `private/tasks/${crypto.randomUUID()}.${type.ext}`;
     await putFile(storageKey, buf, type.mime);

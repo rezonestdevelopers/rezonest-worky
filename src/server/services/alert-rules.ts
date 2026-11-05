@@ -116,7 +116,7 @@ export async function collectAlerts(db: Db, scope: AlertScope, opts: { money: bo
       select: { id: true, title: true, checklist: { select: { project: { select: { id: true, name: true } } } } },
     }),
     db.communicationLog.findMany({
-      where: { nextActionDate: { lte: today, gte: keyToDate(addDaysKey(T, -14)) }, nextAction: { not: null }, client: scope.clientWhere },
+      where: { archivedAt: null, nextActionDate: { lte: today, gte: keyToDate(addDaysKey(T, -14)) }, nextAction: { not: null }, client: scope.clientWhere },
       select: { id: true, clientId: true, nextAction: true, nextActionDate: true, client: { select: { companyName: true } } },
     }),
   ]);

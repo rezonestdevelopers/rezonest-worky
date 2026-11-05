@@ -3,7 +3,7 @@
 Internal agency management system for **Rezonest Digital & Services**, Bhosari, Pune.
 Leads → offers → projects → tasks → GST invoices → payments, all in one place.
 
-> Status: **Phase 7 done** (GST invoices, proforma, credit notes, UPI QR, payments, TDS, advances, payment reminders, statement of account, ageing).
+> Status: **Phase 8 done** (expenses and bills, profit per client and project, client documents, communication log).
 > See [`docs/PROGRESS.md`](docs/PROGRESS.md) for what's built and what's next.
 
 ---

@@ -232,18 +232,19 @@ export const clientTabQueries = {
       take: TAKE,
       select: { id: true, date: true, category: true, description: true, vendor: true, amount: true },
     }),
-  documents: (clientId: string) =>
+  /** Bills and invoices only for people who can see money. */
+  documents: (clientId: string, showMoney: boolean) =>
     db.document.findMany({
-      where: { clientId, archivedAt: null },
+      where: { clientId, archivedAt: null, ...(showMoney ? {} : { category: { notIn: ["BILL", "INVOICE"] } }) },
       orderBy: { createdAt: "desc" },
-      take: TAKE,
-      select: { id: true, name: true, category: true, createdAt: true, sizeBytes: true },
+      take: 100,
+      select: { id: true, name: true, category: true, createdAt: true, sizeBytes: true, mimeType: true, taskId: true },
     }),
   communication: (clientId: string) =>
     db.communicationLog.findMany({
-      where: { clientId },
+      where: { clientId, archivedAt: null },
       orderBy: { date: "desc" },
-      take: TAKE,
+      take: 100,
       select: { id: true, type: true, date: true, summary: true, nextAction: true, nextActionDate: true },
     }),
   activity: (clientId: string) =>

@@ -133,7 +133,7 @@ export async function getLeadDetail(id: string) {
       convertedClient: { select: { id: true, companyName: true } },
       stageHistory: { orderBy: { createdAt: "desc" }, include: { changedBy: { select: { name: true } } } },
       offers: { where: { archivedAt: null }, orderBy: { offerDate: "desc" }, select: { id: true, number: true, title: true, status: true, offerDate: true } },
-      communications: { orderBy: { date: "desc" }, take: 20 },
+      communications: { where: { archivedAt: null }, orderBy: { date: "desc" }, take: 50 },
     },
   });
 }

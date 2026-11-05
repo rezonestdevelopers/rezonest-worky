@@ -385,3 +385,29 @@ which isn't taken off what's owed until applied. The statement's closing balance
 
 ### D-69 Discarded drafts
 Discarding marks a draft Cancelled and keeps the record, as nothing is hard-deleted. With no number it's hidden from lists.
+
+### D-70 What profit counts
+As approved in D-09: revenue before GST from issued tax invoices, less credit notes, less linked expenses before GST, less
+logged time at each person's hourly cost. GST paid on expenses is stored separately and left out of profit, assuming you claim
+it as input credit. If some isn't claimable, that part is really a cost, so please confirm with your CA. Time logged on a task
+that was later archived still counts, because it was still spent. The profit page and dashboard use the same rules.
+
+### D-71 Overheads stay separate
+An expense with no client or project is an agency overhead. It's in the monthly revenue vs expenses view, and shown as its own
+figure on the profit page, but isn't shared out across clients, because any split would be a guess. The monthly view leaves
+out team time, since the brief asks for revenue vs expenses, and salaries aren't in the app.
+
+### D-72 Who sees which documents
+Bills and invoices carry prices, so only admins can see, add or archive those categories, in lists and through the download
+address. Other client documents are open to anyone with sales access. Task files still follow who can see the task. A file
+belonging to a task, the content calendar or an expense can't be archived from the client's list, so it isn't lost from there.
+
+### D-73 Previewing is limited to files checked at upload
+Only PDFs and images open in the browser, and only if their contents were confirmed at upload. Everything else downloads. Each
+response tells the browser not to guess the type and not to run anything, so an uploaded file can't act as a web page on the app.
+The upload limit went from 5 MB to 20 MB for documents and bills. Task attachments stay at 5 MB.
+
+### D-74 Communication entries are archived
+They gained an archived date, so a mistaken entry can be hidden without being deleted, and its reminder closes. Editing doesn't
+move an entry to another client or lead. A next action needs a date and vice versa, or the reminder could never fire. Reminders
+only appear on the date, and look back 14 days, as set in Phase 6.

@@ -3,9 +3,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { dateOnlyKey, formatDateKey, formatDateTime } from "@/lib/dates";
+import { dateOnlyKey, formatDateKey, formatDateTime, istDateKey, todayKey } from "@/lib/dates";
+import { db } from "@/lib/db";
 import { formatINR } from "@/lib/money/format";
-import { sum } from "@/lib/money/decimal";
+import { sum, type Decimal } from "@/lib/money/decimal";
+import { expenseCategoryLabel } from "@/lib/profit";
+import { CommunicationPanel } from "@/components/shared/communication-panel";
+import { profitFor } from "@/server/services/profit";
+import { DocumentsPanel } from "./documents-panel";
 import { effectiveHealth } from "@/lib/health";
 import { paymentModeLabel } from "@/lib/invoice-rules";
 import { humanize } from "@/lib/status";
@@ -202,32 +207,48 @@ export async function ClientTab({ tab, clientId, showMoney }: { tab: string; cli
       );
     }
     case "expenses": {
-      const rows = await clientTabQueries.expenses(clientId);
+      const [rows, profit] = await Promise.all([clientTabQueries.expenses(clientId), profitFor(db, { from: null, to: todayKey(), clientId })]);
       return (
-        <TabTable
-          section="expenses" phase={8} empty="No expenses linked"
-          columns={["Date", "Category", "Description", "Vendor", "Amount"]}
-          rows={rows.map((e) => ({ key: e.id, cells: [formatDateKey(e.date), humanize(e.category), clip(e.description), e.vendor ?? "—", amount(e.amount)] }))}
-        />
+        <div className="space-y-3">
+          <Card className="gap-2">
+            <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[["Revenue before GST", profit.revenue], ["Expenses", profit.expenses], ["Team time", profit.time], ["Profit, all time", profit.profit]].map(([label, value]) => (
+                <div key={label as string}>
+                  <div className="text-xs text-muted-foreground">{label as string}</div>
+                  <div className="font-semibold tabular-nums" data-testid={label === "Profit, all time" ? "client-profit" : undefined}>{formatINR(value as Decimal, { decimals: false })}</div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+          <div className="flex flex-wrap justify-end gap-4">
+            <Link href="/expenses/profit" className="text-sm font-medium underline-offset-4 hover:underline">Profitability</Link>
+            <Link href={`/expenses/new?client=${clientId}`} className="text-sm font-medium underline-offset-4 hover:underline">Add expense</Link>
+          </div>
+          <TabTable
+            section="expenses" empty="No expenses linked"
+            columns={["Date", "Category", "Description", "Paid to", "Amount"]}
+            rows={rows.map((e) => ({ key: e.id, cells: [<Link key="d" href={`/expenses/${e.id}`} className="font-medium whitespace-nowrap hover:underline">{formatDateKey(e.date)}</Link>, expenseCategoryLabel(e.category), clip(e.description), e.vendor ?? "—", amount(e.amount)] }))}
+          />
+        </div>
       );
     }
     case "documents": {
-      const rows = await clientTabQueries.documents(clientId);
+      const rows = await clientTabQueries.documents(clientId, showMoney);
       return (
-        <TabTable
-          section="documents" phase={8} empty="No documents yet"
-          columns={["Name", "Category", "Uploaded", "Size"]}
-          rows={rows.map((d) => ({ key: d.id, cells: [clip(d.name), humanize(d.category), formatDateTime(d.createdAt), `${Math.ceil(d.sizeBytes / 1024)} KB`] }))}
+        <DocumentsPanel
+          clientId={clientId}
+          showMoney={showMoney}
+          rows={rows.map((d) => ({ id: d.id, name: d.name, category: d.category, created: formatDateTime(d.createdAt), sizeBytes: d.sizeBytes, mimeType: d.mimeType, removable: !d.taskId && d.category !== "BILL" }))}
         />
       );
     }
     case "communication": {
       const rows = await clientTabQueries.communication(clientId);
       return (
-        <TabTable
-          section="the communication log" phase={8} empty="No communication logged"
-          columns={["Date", "Type", "Summary", "Next action", "Next action date"]}
-          rows={rows.map((c) => ({ key: c.id, cells: [formatDateTime(c.date), humanize(c.type), clip(c.summary, "max-w-96"), c.nextAction ? clip(c.nextAction) : "—", formatDateKey(c.nextActionDate)] }))}
+        <CommunicationPanel
+          clientId={clientId}
+          today={todayKey()}
+          rows={rows.map((c) => ({ id: c.id, type: c.type, date: istDateKey(c.date), summary: c.summary, nextAction: c.nextAction, nextActionDate: c.nextActionDate ? dateOnlyKey(c.nextActionDate) : null }))}
         />
       );
     }

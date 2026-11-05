@@ -263,4 +263,25 @@ See `docs/DECISIONS.md` → D-09.
   keep their stored amounts until edited. The invoice is always worked out fresh from the offer's items.
 - The invoice lists and dashboard count sample invoices until you run the wipe command.
 
-## Phase 8: Expenses & profitability, documents, communication log ⏳ (not started)
+## Phase 8: Expenses & profitability, documents, communication log ✅ (05 Nov 2026)
+
+### Done
+- **Expenses**: date, category, description, paid to, amount before GST, GST paid, client or project link, and a bill
+  (photo or PDF) you can preview and replace. List with search, filters, sorting, paging and Excel. Archive and restore.
+- **Profitability** (Expenses → Profitability): revenue against expenses for the agency over the last 12 months, and
+  profit per client and per project for a chosen period, with Excel. A client's Expenses tab and a project's overview show their own.
+- **Documents**: a client's Documents tab has upload, preview, download and archive, up to 20 MB.
+  A file's real contents are checked, whatever its name says.
+- **Communication log**: on each client and lead. Calls, meetings and messages, edit and archive. A next action with a
+  date becomes a reminder on that date, on the dashboard, bell and digest.
+- **Tests**: 551 unit + integration tests (48 new), 67 end-to-end browser tests (8 new). All passing.
+
+### Known issues / limitations
+- Please confirm with your CA: profit counts expenses before GST, on the basis that you claim the GST paid as input credit (D-70).
+- Overheads aren't shared out to clients, so client profits add up to more than the agency's actual profit (D-71).
+- Sample data has no documents or bills, so those lists start empty.
+- Team time only counts for people whose hourly cost is set under Team.
+- A project's revenue only counts invoices linked to that project. Blank invoices with no project count for the client only.
+- Files are stored on this PC in the `storage` folder until cloud storage is set for going live.
+
+## Phase 9: Reports, GST summary, data export, backups ⏳ (not started)

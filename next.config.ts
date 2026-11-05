@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["@react-pdf/renderer"],
   outputFileTracingIncludes: { "/**": ["./src/lib/pdf/fonts/*"] },
   experimental: {
-    // Default is 1 MB. Logos go up to 2 MB and Excel imports up to 5 MB.
-    serverActions: { bodySizeLimit: "6mb" },
+    // Default is 1 MB. Client documents and bills go up to 20 MB.
+    serverActions: { bodySizeLimit: "21mb" },
   },
 };
 

@@ -122,7 +122,7 @@ test.describe("Phase 2: leads", () => {
     await expect(page).toHaveURL(LEAD_PAGE);
     const url = page.url();
 
-    await page.getByRole("button", { name: "Archive" }).click();
+    await page.getByRole("button", { name: "Archive", exact: true }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Archive" }).click();
     await expect(page.getByText(/This lead was archived/)).toBeVisible();
 
@@ -189,7 +189,7 @@ test.describe("Phase 2: clients", () => {
       await expect(page.getByText(expected).first()).toBeVisible();
     }
 
-    await page.getByRole("button", { name: "Archive" }).click();
+    await page.getByRole("button", { name: "Archive", exact: true }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Archive" }).click();
     await expect(page.getByText(/can't be archived yet/)).toBeVisible();
     await expect(page.getByText(/This client was archived/)).toHaveCount(0);

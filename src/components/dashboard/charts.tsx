@@ -54,6 +54,25 @@ export function RevenueTrendChart({ data }: { data: { month: string; invoiced: n
   );
 }
 
+/** The agency's revenue against its expenses, month by month, before GST. */
+export function RevenueExpenseChart({ data }: { data: { month: string; revenue: number; expenses: number }[] }) {
+  return (
+    <div className="h-72 w-full">
+      <ResponsiveContainer>
+        <BarChart data={data} margin={{ top: 8, right: 4, left: 0, bottom: 0 }} barGap={2} barCategoryGap="22%">
+          <CartesianGrid vertical={false} stroke={GRID} />
+          <XAxis dataKey="month" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+          <YAxis tick={AXIS} tickLine={false} axisLine={false} width={52} tickFormatter={(v: number) => formatINRCompact(v)} />
+          <Tooltip cursor={{ fill: "var(--muted)", opacity: 0.6 }} content={(p) => <ChartTooltip {...p} format={(v) => formatINR(v, { decimals: false })} />} />
+          <Legend iconType="square" iconSize={10} formatter={LegendText} wrapperStyle={{ paddingTop: 8 }} />
+          <Bar dataKey="revenue" name="Revenue" fill="var(--chart-1)" radius={[4, 4, 0, 0]} maxBarSize={22} />
+          <Bar dataKey="expenses" name="Expenses" fill="var(--chart-2)" radius={[4, 4, 0, 0]} maxBarSize={22} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 /** Revenue by service — single series, horizontal, sorted. */
 export function ServiceRevenueChart({ data }: { data: { name: string; value: number }[] }) {
   const height = Math.max(180, data.length * 34 + 20);
